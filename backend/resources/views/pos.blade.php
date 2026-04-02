@@ -97,17 +97,21 @@
 </div>
 </div>
 <nav class="space-y-1">
-<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-[#434654] dark:text-slate-400 hover:bg-[#f2f3ff] dark:hover:bg-slate-800 transition-colors" href="#">
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-[#434654] dark:text-slate-400 hover:bg-[#f2f3ff] dark:hover:bg-slate-800 transition-colors" href="{{ route('dashboard') }}">
 <span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
 <span class="text-sm font-medium">Dashboard</span>
 </a>
-<a class="flex items-center gap-3 px-4 py-3 rounded-lg bg-[#e2e7ff] dark:bg-blue-900/30 text-[#003d9b] dark:text-blue-200 border-r-4 border-[#003d9b] translate-x-1 transition-transform" href="#">
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg bg-[#e2e7ff] dark:bg-blue-900/30 text-[#003d9b] dark:text-blue-200 border-r-4 border-[#003d9b] translate-x-1 transition-transform" href="{{ route('expenses.create') }}">
 <span class="material-symbols-outlined" data-icon="receipt_long">receipt_long</span>
 <span class="text-sm font-medium">Expenses</span>
 </a>
-<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-[#434654] dark:text-slate-400 hover:bg-[#f2f3ff] dark:hover:bg-slate-800 transition-colors" href="#">
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-[#434654] dark:text-slate-400 hover:bg-[#f2f3ff] dark:hover:bg-slate-800 transition-colors" href="{{ route('analytics') }}">
 <span class="material-symbols-outlined" data-icon="bar_chart">bar_chart</span>
 <span class="text-sm font-medium">Analytics</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-[#434654] dark:text-slate-400 hover:bg-[#f2f3ff] dark:hover:bg-slate-800 transition-colors" href="{{ route('projects') }}">
+<span class="material-symbols-outlined" data-icon="architecture">architecture</span>
+<span class="text-sm font-medium">Projects</span>
 </a>
 <a class="flex items-center gap-3 px-4 py-3 rounded-lg text-[#434654] dark:text-slate-400 hover:bg-[#f2f3ff] dark:hover:bg-slate-800 transition-colors" href="#">
 <span class="material-symbols-outlined" data-icon="settings">settings</span>
@@ -116,10 +120,10 @@
 </nav>
 </div>
 <div class="mt-auto px-6 py-6">
-<button class="w-full bg-gradient-to-br from-primary to-primary-container text-on-primary py-3 px-4 rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg active:scale-95 duration-150">
+<a class="w-full bg-gradient-to-br from-primary to-primary-container text-on-primary py-3 px-4 rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg active:scale-95 duration-150" href="{{ route('expenses.create') }}">
 <span class="material-symbols-outlined" data-icon="add">add</span>
         New Expense
-      </button>
+  </a>
 </div>
 </aside>
 <!-- Main Content Wrapper -->
@@ -129,9 +133,9 @@
 <div class="flex items-center gap-8">
 <div class="md:hidden text-xl font-black text-[#003d9b] font-headline">CS</div>
 <nav class="hidden md:flex items-center gap-6">
-<a class="text-[#434654] dark:text-slate-400 hover:bg-[#e2e7ff] dark:hover:bg-slate-700 transition-colors px-2 py-1 rounded" href="#">Projects</a>
-<a class="text-[#003d9b] dark:text-blue-400 font-bold border-b-2 border-[#003d9b] pb-1" href="#">Expenses</a>
-<a class="text-[#434654] dark:text-slate-400 hover:bg-[#e2e7ff] dark:hover:bg-slate-700 transition-colors px-2 py-1 rounded" href="#">Reports</a>
+<a class="text-[#434654] dark:text-slate-400 hover:bg-[#e2e7ff] dark:hover:bg-slate-700 transition-colors px-2 py-1 rounded" href="{{ route('projects') }}">Projects</a>
+<a class="text-[#003d9b] dark:text-blue-400 font-bold border-b-2 border-[#003d9b] pb-1" href="{{ route('expenses.create') }}">Expenses</a>
+<a class="text-[#434654] dark:text-slate-400 hover:bg-[#e2e7ff] dark:hover:bg-slate-700 transition-colors px-2 py-1 rounded" href="{{ route('analytics') }}">Reports</a>
 </nav>
 </div>
 <div class="flex items-center gap-4">
@@ -185,6 +189,19 @@
 </select>
 </div>
 </div>
+<!-- Project Field -->
+<div class="space-y-2">
+<label class="text-xs font-bold uppercase tracking-wider text-on-surface-variant flex items-center gap-2">
+<span class="material-symbols-outlined text-sm" data-icon="architecture">architecture</span>
+                Project
+              </label>
+<select class="w-full bg-surface-container-low border-0 border-b-2 border-transparent focus:border-primary focus:ring-0 px-4 py-3 rounded-lg text-sm transition-all appearance-none" id="project-name">
+<option value="">— No Project —</option>
+@foreach($availableProjects as $proj)
+<option value="{{ $proj }}">{{ $proj }}</option>
+@endforeach
+</select>
+</div>
 <!-- Title Field -->
 <div class="space-y-2">
 <label class="text-xs font-bold uppercase tracking-wider text-on-surface-variant flex items-center gap-2">
@@ -200,8 +217,8 @@
                 Amount
               </label>
 <div class="relative">
-<span class="absolute left-4 top-1/2 -translate-y-1/2 font-bold text-primary">£</span>
-<input class="w-full bg-surface-container-low border-0 border-b-2 border-transparent focus:border-primary focus:ring-0 pl-8 pr-4 py-3 rounded-lg font-bold text-lg transition-all" id="expense-amount" placeholder="0.00" step="0.01" type="number"/>
+<span class="absolute left-4 top-1/2 -translate-y-1/2 font-bold text-primary text-sm">LKR</span>
+<input class="w-full bg-surface-container-low border-0 border-b-2 border-transparent focus:border-primary focus:ring-0 pl-14 pr-4 py-3 rounded-lg font-bold text-lg transition-all" id="expense-amount" placeholder="0.00" step="0.01" type="number"/>
 </div>
 </div>
 <!-- Payment Type Toggle (The Segmented Control) -->
@@ -225,6 +242,19 @@
 <span class="material-symbols-outlined text-xs" data-icon="info">info</span>
                 Marked for reimbursement
               </div>
+
+<div class="hidden space-y-2" id="director-field">
+<label class="text-xs font-bold uppercase tracking-wider text-on-surface-variant flex items-center gap-2">
+<span class="material-symbols-outlined text-sm" data-icon="person">person</span>
+                  Director Name
+                </label>
+<select class="w-full bg-surface-container-low border-0 border-b-2 border-transparent focus:border-primary focus:ring-0 px-4 py-3 rounded-lg text-sm transition-all appearance-none" id="director-name">
+<option value="">Select Director</option>
+<option value="Buddhika">Buddhika</option>
+<option value="Nilitha">Nilitha</option>
+<option value="Vihaga">Vihaga</option>
+</select>
+</div>
 </div>
 <!-- Notes Field -->
 <div class="space-y-2">
@@ -277,23 +307,23 @@
 </div>
 <!-- Mobile Navigation Shell -->
 <nav class="md:hidden fixed bottom-0 left-0 w-full bg-white flex justify-around py-3 px-2 border-t border-surface-container z-50">
-<button class="flex flex-col items-center gap-1 text-on-surface-variant">
+<a class="flex flex-col items-center gap-1 text-on-surface-variant" href="{{ route('dashboard') }}">
 <span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
 <span class="text-[10px] font-medium">Home</span>
-</button>
-<button class="flex flex-col items-center gap-1 text-[#003d9b]">
+</a>
+<a class="flex flex-col items-center gap-1 text-[#003d9b]" href="{{ route('expenses.create') }}">
 <span class="material-symbols-outlined" data-icon="receipt_long" data-weight="fill" style="font-variation-settings: 'FILL' 1;">receipt_long</span>
 <span class="text-[10px] font-bold">Expenses</span>
-</button>
+</a>
 <div class="relative -top-6">
-<button class="w-14 h-14 bg-primary text-white rounded-full flex items-center justify-center shadow-lg">
+<a class="w-14 h-14 bg-primary text-white rounded-full flex items-center justify-center shadow-lg" href="{{ route('expenses.create') }}">
 <span class="material-symbols-outlined text-3xl" data-icon="add">add</span>
-</button>
+</a>
 </div>
-<button class="flex flex-col items-center gap-1 text-on-surface-variant">
+<a class="flex flex-col items-center gap-1 text-on-surface-variant" href="{{ route('analytics') }}">
 <span class="material-symbols-outlined" data-icon="bar_chart">bar_chart</span>
 <span class="text-[10px] font-medium">Reports</span>
-</button>
+</a>
 <button class="flex flex-col items-center gap-1 text-on-surface-variant">
 <span class="material-symbols-outlined" data-icon="settings">settings</span>
 <span class="text-[10px] font-medium">Settings</span>
@@ -307,6 +337,8 @@
   const directorBtn = document.getElementById("payment-director");
   const paymentTypeInput = document.getElementById("payment-type");
   const reimbursementNote = document.getElementById("reimbursement-note");
+  const directorField = document.getElementById("director-field");
+  const directorNameInput = document.getElementById("director-name");
   const receiptDropzone = document.getElementById("receipt-dropzone");
   const receiptInput = document.getElementById("receipt-file");
   const receiptFileName = document.getElementById("receipt-file-name");
@@ -318,6 +350,14 @@
     paymentTypeInput.value = type;
     reimbursementNote.classList.toggle("hidden", isCompany);
     reimbursementNote.classList.toggle("flex", !isCompany);
+    directorField.classList.toggle("hidden", isCompany);
+
+    if (isCompany) {
+      directorNameInput.value = "";
+      directorNameInput.removeAttribute("required");
+    } else {
+      directorNameInput.setAttribute("required", "required");
+    }
 
     companyBtn.className = isCompany
       ? "flex items-center justify-center gap-2 py-3 px-4 rounded-lg bg-white shadow-sm text-primary font-bold transition-all border border-primary/10"
@@ -349,6 +389,7 @@
     const title = document.getElementById("expense-title").value;
     const amount = document.getElementById("expense-amount").value;
     const notes = document.getElementById("expense-notes").value;
+    const directorName = directorNameInput.value;
 
     if (!expenseDate || !category || !title || !amount) {
       statusText.textContent = "Please fill in all required fields (Date, Category, Title, Amount)";
@@ -357,12 +398,21 @@
       return;
     }
 
+    if (paymentTypeInput.value === "director_paid" && !directorName) {
+      statusText.textContent = "Please select Director Name for director-paid expenses.";
+      statusText.className = "mt-4 text-sm font-semibold text-red-700";
+      saveBtn.disabled = false;
+      return;
+    }
+
     const payload = new FormData();
+    payload.append("project_name", document.getElementById("project-name").value);
     payload.append("expense_date", expenseDate);
     payload.append("category", category);
     payload.append("title", title);
     payload.append("amount", amount);
     payload.append("payment_type", paymentTypeInput.value);
+    payload.append("director_name", directorName);
     payload.append("notes", notes);
 
     if (receiptInput.files.length > 0) {

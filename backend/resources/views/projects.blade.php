@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gaura Projects</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+  <style>
+    body { font-family: Inter, sans-serif; background: #faf8ff; color: #131b2e; }
+    h1, h2, h3 { font-family: Manrope, sans-serif; }
+    .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+  </style>
+</head>
+<body>
+  <aside class="fixed left-0 top-0 z-40 hidden h-screen w-64 flex-col bg-[#faf8ff] shadow-[8px_0_24px_rgba(19,27,46,0.06)] md:flex">
+    <div class="px-6 py-8">
+      <div class="mb-8 text-lg font-bold text-[#003d9b]">ConstructSafe</div>
+      <div class="mb-8 rounded-xl bg-[#f2f3ff] p-4">
+        <div class="flex items-center gap-3">
+          <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-[#0052cc] text-white">
+            <span class="material-symbols-outlined">architecture</span>
+          </div>
+          <div>
+            <div class="text-sm font-bold">Gaura Construction</div>
+            <div class="text-xs text-slate-500">Projects Overview</div>
+          </div>
+        </div>
+      </div>
+      <nav class="space-y-1">
+        <a class="flex items-center gap-3 rounded-lg px-4 py-3 text-[#434654] hover:bg-[#f2f3ff]" href="{{ route('dashboard') }}">
+          <span class="material-symbols-outlined">dashboard</span>
+          <span class="text-sm font-medium">Dashboard</span>
+        </a>
+        <a class="flex items-center gap-3 rounded-lg px-4 py-3 text-[#434654] hover:bg-[#f2f3ff]" href="{{ route('expenses.create') }}">
+          <span class="material-symbols-outlined">receipt_long</span>
+          <span class="text-sm font-medium">Expenses</span>
+        </a>
+        <a class="flex translate-x-1 items-center gap-3 rounded-lg border-r-4 border-[#003d9b] bg-[#e2e7ff] px-4 py-3 text-[#003d9b]" href="{{ route('projects') }}">
+          <span class="material-symbols-outlined">architecture</span>
+          <span class="text-sm font-medium">Projects</span>
+        </a>
+        <a class="flex items-center gap-3 rounded-lg px-4 py-3 text-[#434654] hover:bg-[#f2f3ff]" href="{{ route('analytics') }}">
+          <span class="material-symbols-outlined">bar_chart</span>
+          <span class="text-sm font-medium">Analytics</span>
+        </a>
+      </nav>
+    </div>
+    <div class="mt-auto px-6 py-6">
+      <a class="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-br from-[#003d9b] to-[#0052cc] px-4 py-3 font-bold text-white" href="{{ route('expenses.create') }}">
+        <span class="material-symbols-outlined">add</span>
+        New Expense
+      </a>
+    </div>
+  </aside>
+
+  <div class="flex min-h-screen flex-col md:ml-64">
+    <header class="sticky top-0 z-30 flex w-full items-center justify-between bg-[#faf8ff] px-6 py-3 shadow-sm">
+      <div class="text-xl font-black text-[#003d9b] md:hidden">CS</div>
+      <nav class="hidden items-center gap-6 md:flex">
+        <a class="font-bold text-[#003d9b] border-b-2 border-[#003d9b] pb-1" href="{{ route('projects') }}">Projects</a>
+        <a class="text-[#434654] hover:bg-[#e2e7ff] rounded px-2 py-1" href="{{ route('expenses.create') }}">Expenses</a>
+        <a class="text-[#434654] hover:bg-[#e2e7ff] rounded px-2 py-1" href="{{ route('analytics') }}">Reports</a>
+      </nav>
+      <a class="rounded-lg bg-[#003d9b] px-4 py-2 text-sm font-semibold text-white" href="{{ route('expenses.create') }}">Add Expense</a>
+    </header>
+
+    <main class="mx-auto w-full max-w-6xl flex-1 p-6 md:p-10">
+      <div class="mb-8 flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <h1 class="text-3xl font-extrabold text-[#003d9b]">Projects</h1>
+          <p class="text-sm text-slate-600">Expense breakdown by construction project.</p>
+        </div>
+        <button onclick="document.getElementById('new-project-modal').classList.remove('hidden')"
+                class="flex items-center gap-2 rounded-lg bg-[#003d9b] px-4 py-2 text-sm font-semibold text-white hover:bg-[#0040a2] transition-colors">
+          <span class="material-symbols-outlined text-base">add</span>
+          New Project
+        </button>
+      </div>
+
+      {{-- Flash messages --}}
+      @if(session('success'))
+        <div class="mb-6 flex items-center gap-3 rounded-lg bg-green-50 border border-green-200 px-4 py-3 text-sm text-green-700 font-semibold">
+          <span class="material-symbols-outlined text-base">check_circle</span>
+          {{ session('success') }}
+        </div>
+      @endif
+      @if($errors->any())
+        <div class="mb-6 flex items-center gap-3 rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700 font-semibold">
+          <span class="material-symbols-outlined text-base">error</span>
+          {{ $errors->first() }}
+        </div>
+      @endif
+
+      {{-- Summary Cards --}}
+      <section class="mb-8 grid grid-cols-1 gap-4 md:grid-cols-3">
+        <div class="rounded-xl border border-slate-100 bg-white p-5 shadow-sm">
+          <p class="text-sm text-slate-500">Active Projects</p>
+          <p class="mt-2 text-3xl font-extrabold">{{ $projects->count() }}</p>
+        </div>
+        <div class="rounded-xl border border-slate-100 bg-white p-5 shadow-sm">
+          <p class="text-sm text-slate-500">Total Across Projects</p>
+          <p class="mt-2 text-3xl font-extrabold">LKR {{ number_format((float) $projects->sum('total'), 2) }}</p>
+        </div>
+        <div class="rounded-xl border border-slate-100 bg-white p-5 shadow-sm">
+          <p class="text-sm text-slate-500">Unassigned Expenses</p>
+          <p class="mt-2 text-3xl font-extrabold">{{ $unassignedCount }}</p>
+        </div>
+      </section>
+
+      {{-- Project Cards --}}
+      @if($projects->isEmpty())
+        <div class="rounded-xl border border-dashed border-slate-300 bg-white p-12 text-center">
+          <span class="material-symbols-outlined text-5xl text-slate-300 mb-3 block">architecture</span>
+          <p class="text-lg font-bold text-slate-500">No projects yet</p>
+          <p class="text-sm text-slate-400 mt-1">Create a project first, then assign expenses to it.</p>
+          <button onclick="document.getElementById('new-project-modal').classList.remove('hidden')"
+                  class="mt-6 inline-block rounded-lg bg-[#003d9b] px-6 py-2 text-sm font-semibold text-white">
+            Create First Project
+          </button>
+        </div>
+      @else
+        <section class="mb-8 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+          @foreach($projects as $project)
+            @php($grandTotal = (float) $projects->sum('total'))
+            @php($pct = $grandTotal > 0 ? round(((float) $project->total / $grandTotal) * 100, 1) : 0)
+            <div class="rounded-xl border border-slate-100 bg-white p-5 shadow-sm flex flex-col gap-3">
+              <div class="flex items-start justify-between">
+                <div class="flex items-center gap-2">
+                  <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-[#e2e7ff] text-[#003d9b]">
+                    <span class="material-symbols-outlined text-lg">architecture</span>
+                  </div>
+                  <div>
+                    <div class="font-bold text-sm">{{ $project->project_name }}</div>
+                    <div class="text-xs text-slate-500">{{ $project->expense_count }} expense{{ $project->expense_count == 1 ? '' : 's' }}</div>
+                  </div>
+                </div>
+                <span class="text-xs font-bold text-[#003d9b] bg-[#e2e7ff] px-2 py-1 rounded-full">{{ $pct }}%</span>
+              </div>
+              <div class="text-2xl font-extrabold">LKR {{ number_format((float) $project->total, 2) }}</div>
+              <div class="h-1.5 rounded-full bg-slate-100">
+                <div class="h-1.5 rounded-full bg-[#003d9b]" style="width: {{ $pct }}%"></div>
+              </div>
+            </div>
+          @endforeach
+        </section>
+
+        {{-- Recent Project Expenses Table --}}
+        <section class="overflow-hidden rounded-xl border border-slate-100 bg-white shadow-sm">
+          <div class="border-b border-slate-100 px-5 py-4">
+            <h2 class="text-lg font-bold">Project Expenses</h2>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+              <thead class="bg-slate-50 text-slate-600">
+                <tr>
+                  <th class="px-5 py-3 text-left">Date</th>
+                  <th class="px-5 py-3 text-left">Project</th>
+                  <th class="px-5 py-3 text-left">Title</th>
+                  <th class="px-5 py-3 text-left">Category</th>
+                  <th class="px-5 py-3 text-left">Director</th>
+                  <th class="px-5 py-3 text-right">Amount</th>
+                </tr>
+              </thead>
+              <tbody>
+                @forelse($recentExpenses as $expense)
+                  <tr class="border-t border-slate-100 hover:bg-slate-50">
+                    <td class="px-5 py-3 text-slate-500">{{ optional($expense->expense_date)->format('Y-m-d') }}</td>
+                    <td class="px-5 py-3 font-medium">{{ $expense->project_name }}</td>
+                    <td class="px-5 py-3">{{ $expense->title }}</td>
+                    <td class="px-5 py-3">
+                      <span class="rounded-full bg-[#e2e7ff] px-2 py-0.5 text-xs font-semibold text-[#003d9b]">{{ $expense->category }}</span>
+                    </td>
+                    <td class="px-5 py-3 text-slate-500">{{ $expense->director_name ?? '—' }}</td>
+                    <td class="px-5 py-3 text-right font-bold">LKR {{ number_format((float) $expense->amount, 2) }}</td>
+                  </tr>
+                @empty
+                  <tr><td colspan="6" class="px-5 py-8 text-center text-slate-400">No project expenses yet.</td></tr>
+                @endforelse
+              </tbody>
+            </table>
+          </div>
+        </section>
+      @endif
+    </main>
+  </div>
+
+  {{-- New Project Modal --}}
+  <div id="new-project-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+    <div class="w-full max-w-md rounded-2xl bg-white p-8 shadow-2xl">
+      <div class="mb-6 flex items-center justify-between">
+        <h2 class="text-xl font-extrabold text-[#003d9b]">New Project</h2>
+        <button onclick="document.getElementById('new-project-modal').classList.add('hidden')"
+                class="flex h-8 w-8 items-center justify-center rounded-full text-slate-400 hover:bg-slate-100 transition-colors">
+          <span class="material-symbols-outlined text-lg">close</span>
+        </button>
+      </div>
+      <form method="POST" action="{{ route('projects.store') }}">
+        @csrf
+        <div class="mb-5">
+          <label class="mb-1.5 block text-xs font-bold uppercase tracking-wider text-slate-500">Project Name</label>
+          <input name="name" type="text" required maxlength="100"
+                 placeholder="e.g., Galle Road Site 102"
+                 class="w-full rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm focus:border-[#003d9b] focus:ring-1 focus:ring-[#003d9b] outline-none" />
+        </div>
+        <div class="flex gap-3">
+          <button type="submit"
+                  class="flex-1 rounded-lg bg-[#003d9b] py-3 text-sm font-bold text-white hover:bg-[#0040a2] transition-colors">
+            Create Project
+          </button>
+          <button type="button"
+                  onclick="document.getElementById('new-project-modal').classList.add('hidden')"
+                  class="flex-1 rounded-lg border border-slate-200 py-3 text-sm font-bold text-slate-600 hover:bg-slate-50 transition-colors">
+            Cancel
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <nav class="md:hidden fixed bottom-0 left-0 w-full bg-white flex justify-around py-3 px-2 border-t border-slate-100 z-50">
+    <a class="flex flex-col items-center gap-1 text-slate-400" href="{{ route('dashboard') }}">
+      <span class="material-symbols-outlined">dashboard</span>
+      <span class="text-[10px]">Home</span>
+    </a>
+    <a class="flex flex-col items-center gap-1 text-slate-400" href="{{ route('expenses.create') }}">
+      <span class="material-symbols-outlined">receipt_long</span>
+      <span class="text-[10px]">Expenses</span>
+    </a>
+    <a class="flex flex-col items-center gap-1 text-[#003d9b]" href="{{ route('projects') }}">
+      <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">architecture</span>
+      <span class="text-[10px] font-bold">Projects</span>
+    </a>
+    <a class="flex flex-col items-center gap-1 text-slate-400" href="{{ route('analytics') }}">
+      <span class="material-symbols-outlined">bar_chart</span>
+      <span class="text-[10px]">Reports</span>
+    </a>
+  </nav>
+</body>
+</html>
