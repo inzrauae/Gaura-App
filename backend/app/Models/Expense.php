@@ -16,6 +16,7 @@ class Expense extends Model
         'amount',
         'payment_type',
         'director_name',
+        'director_fund_source',
         'notes',
         'receipt_path',
     ];

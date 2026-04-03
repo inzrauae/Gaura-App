@@ -3,6 +3,9 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#003d9b" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <title>Gaura Projects</title>
   <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
@@ -11,22 +14,41 @@
     body { font-family: Inter, sans-serif; background: #faf8ff; color: #131b2e; }
     h1, h2, h3 { font-family: Manrope, sans-serif; }
     .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+    body.dark { background: #0b1220; color: #e5e7eb; }
+    body.dark aside, body.dark header { background: #111827 !important; color: #e5e7eb; }
+    body.dark .bg-white { background: #1f2937 !important; }
+    body.dark .bg-slate-50 { background: #111827 !important; }
+    body.dark .border-slate-100, body.dark .border-slate-200, body.dark .border-slate-300 { border-color: #374151 !important; }
+    body.dark .text-slate-500, body.dark .text-slate-600, body.dark .text-slate-400 { color: #9ca3af !important; }
+    body.dark .text-[#434654] { color: #d1d5db !important; }
+    body.dark .bg-[#f2f3ff] { background: #1f2937 !important; }
+    body.dark a:hover { background: #1f2937 !important; }
+    .theme-toggle { border: 1px solid #d1d5db; }
+    body.dark .theme-toggle { border-color: #374151; color: #e5e7eb; background: #111827; }
   </style>
 </head>
 <body>
   <aside class="fixed left-0 top-0 z-40 hidden h-screen w-64 flex-col bg-[#faf8ff] shadow-[8px_0_24px_rgba(19,27,46,0.06)] md:flex">
     <div class="px-6 py-8">
-      <div class="mb-8 text-lg font-bold text-[#003d9b]">ConstructSafe</div>
+      <div class="mb-8 text-lg font-bold text-[#003d9b]">GAURA</div>
       <div class="mb-8 rounded-xl bg-[#f2f3ff] p-4">
         <div class="flex items-center gap-3">
           <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-[#0052cc] text-white">
             <span class="material-symbols-outlined">architecture</span>
           </div>
           <div>
-            <div class="text-sm font-bold">Gaura Construction</div>
-            <div class="text-xs text-slate-500">Projects Overview</div>
+            <div class="text-sm font-bold">{{ $sidebarProjectName }}</div>
+            <div class="text-xs text-slate-500">{{ $sidebarProjectSubtitle }}</div>
           </div>
         </div>
+        <form action="{{ route('projects') }}" method="GET" class="mt-3">
+          <select name="active_project" onchange="this.form.submit()" class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-600 focus:border-[#003d9b] focus:ring-[#003d9b]">
+            <option value="">All Projects</option>
+            @foreach($availableProjects as $projectName)
+              <option value="{{ $projectName }}" {{ $selectedProjectName === $projectName ? 'selected' : '' }}>{{ $projectName }}</option>
+            @endforeach
+          </select>
+        </form>
       </div>
       <nav class="space-y-1">
         <a class="flex items-center gap-3 rounded-lg px-4 py-3 text-[#434654] hover:bg-[#f2f3ff]" href="{{ route('dashboard') }}">
@@ -45,6 +67,10 @@
           <span class="material-symbols-outlined">bar_chart</span>
           <span class="text-sm font-medium">Analytics</span>
         </a>
+        <a class="flex items-center gap-3 rounded-lg px-4 py-3 text-[#434654] hover:bg-[#f2f3ff]" href="{{ route('settings') }}">
+          <span class="material-symbols-outlined">settings</span>
+          <span class="text-sm font-medium">Settings</span>
+        </a>
       </nav>
     </div>
     <div class="mt-auto px-6 py-6">
@@ -56,17 +82,20 @@
   </aside>
 
   <div class="flex min-h-screen flex-col md:ml-64">
-    <header class="sticky top-0 z-30 flex w-full items-center justify-between bg-[#faf8ff] px-6 py-3 shadow-sm">
+    <header class="sticky top-0 z-30 flex w-full items-center justify-between bg-[#faf8ff] px-6 py-3">
       <div class="text-xl font-black text-[#003d9b] md:hidden">CS</div>
       <nav class="hidden items-center gap-6 md:flex">
         <a class="font-bold text-[#003d9b] border-b-2 border-[#003d9b] pb-1" href="{{ route('projects') }}">Projects</a>
         <a class="text-[#434654] hover:bg-[#e2e7ff] rounded px-2 py-1" href="{{ route('expenses.create') }}">Expenses</a>
         <a class="text-[#434654] hover:bg-[#e2e7ff] rounded px-2 py-1" href="{{ route('analytics') }}">Reports</a>
       </nav>
-      <a class="rounded-lg bg-[#003d9b] px-4 py-2 text-sm font-semibold text-white" href="{{ route('expenses.create') }}">Add Expense</a>
+      <div class="flex items-center gap-2">
+        <button id="theme-toggle" class="theme-toggle rounded-lg px-3 py-2 text-sm font-semibold" type="button">Dark</button>
+        <a class="rounded-lg bg-[#003d9b] px-4 py-2 text-sm font-semibold text-white" href="{{ route('expenses.create') }}">Add Expense</a>
+      </div>
     </header>
 
-    <main class="mx-auto w-full max-w-6xl flex-1 p-6 md:p-10">
+    <main class="mx-auto w-full max-w-6xl flex-1 p-6 pb-24 md:p-10 md:pb-10">
       <div class="mb-8 flex flex-wrap items-start justify-between gap-4">
         <div>
           <h1 class="text-3xl font-extrabold text-[#003d9b]">Projects</h1>
@@ -237,5 +266,20 @@
       <span class="text-[10px]">Reports</span>
     </a>
   </nav>
+  <script>
+    (function () {
+      const key = 'gaura_theme';
+      const saved = localStorage.getItem(key);
+      if (saved === 'dark') document.body.classList.add('dark');
+      const btn = document.getElementById('theme-toggle');
+      const sync = () => { btn.textContent = document.body.classList.contains('dark') ? 'Light' : 'Dark'; };
+      sync();
+      btn.addEventListener('click', function () {
+        document.body.classList.toggle('dark');
+        localStorage.setItem(key, document.body.classList.contains('dark') ? 'dark' : 'light');
+        sync();
+      });
+    })();
+  </script>
 </body>
 </html>

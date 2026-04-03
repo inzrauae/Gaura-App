@@ -30,6 +30,7 @@ class StoreExpenseRequest extends FormRequest
             'amount' => ['required', 'numeric', 'min:0'],
             'payment_type' => ['required', 'in:company_paid,director_paid'],
             'director_name' => ['nullable', 'required_if:payment_type,director_paid', 'in:Buddhika,Nilitha,Vihaga'],
+            'director_fund_source' => ['nullable', 'required_if:payment_type,director_paid', 'in:cash_in_hand,bank_balance'],
             'notes' => ['nullable', 'string'],
             'receipt' => ['nullable', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:10240'],
         ];

@@ -45,6 +45,7 @@ class ExpenseController extends Controller
 
         if (($validated['payment_type'] ?? null) === 'company_paid') {
             $validated['director_name'] = null;
+            $validated['director_fund_source'] = null;
         }
 
         if ($request->hasFile('receipt')) {
@@ -81,6 +82,7 @@ class ExpenseController extends Controller
         $effectivePaymentType = $validated['payment_type'] ?? $expense->payment_type;
         if ($effectivePaymentType === 'company_paid') {
             $validated['director_name'] = null;
+            $validated['director_fund_source'] = null;
         }
 
         if ($request->hasFile('receipt')) {

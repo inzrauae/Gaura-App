@@ -5,23 +5,76 @@ use App\Models\Project;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
+Route::get('/expenses', function () {
     $availableProjects = Project::orderBy('name')->pluck('name');
-    return view('pos', ['availableProjects' => $availableProjects]);
+    $requestedProject = request('active_project');
+
+    if ($requestedProject !== null) {
+        if ($requestedProject === '') {
+            session()->forget('active_project');
+        } elseif ($availableProjects->contains($requestedProject)) {
+            session(['active_project' => $requestedProject]);
+        }
+    }
+
+    $selectedProjectName = session('active_project');
+    if ($selectedProjectName && !$availableProjects->contains($selectedProjectName)) {
+        $selectedProjectName = null;
+        session()->forget('active_project');
+    }
+
+    return view('pos', [
+        'availableProjects' => $availableProjects,
+        'sidebarProjectName' => 'GAURA',
+        'sidebarProjectSubtitle' => 'GAURA',
+        'selectedProjectName' => $selectedProjectName,
+    ]);
 })->name('expenses.create');
 
-Route::get('/dashboard', function () {
-    $totalExpenses = Expense::count();
-    $totalAmount = Expense::sum('amount');
-    $thisMonthAmount = Expense::query()
+Route::get('/', function () {
+    $availableProjects = Project::orderBy('name')->pluck('name');
+    $requestedProject = request('active_project');
+
+    if ($requestedProject !== null) {
+        if ($requestedProject === '') {
+            session()->forget('active_project');
+        } elseif ($availableProjects->contains($requestedProject)) {
+            session(['active_project' => $requestedProject]);
+        }
+    }
+
+    $selectedProjectName = session('active_project');
+    if ($selectedProjectName && !$availableProjects->contains($selectedProjectName)) {
+        $selectedProjectName = null;
+        session()->forget('active_project');
+    }
+
+    $dashboardExpenses = Expense::query()
+        ->when($selectedProjectName, fn ($query) => $query->where('project_name', $selectedProjectName));
+
+    $totalExpenses = (clone $dashboardExpenses)->count();
+    $totalAmount = (clone $dashboardExpenses)->sum('amount');
+    $thisMonthAmount = (clone $dashboardExpenses)
         ->whereYear('expense_date', now()->year)
         ->whereMonth('expense_date', now()->month)
         ->sum('amount');
 
-    $recentExpenses = Expense::query()
+    $recentExpenses = (clone $dashboardExpenses)
         ->latest('expense_date')
         ->latest('id')
         ->take(10)
+        ->get();
+
+    $monthlyRows = (clone $dashboardExpenses)
+        ->selectRaw("strftime('%Y-%m', expense_date) as month, SUM(amount) as total")
+        ->groupBy('month')
+        ->orderBy('month')
+        ->get();
+
+    $categoryRows = (clone $dashboardExpenses)
+        ->selectRaw('category, SUM(amount) as total')
+        ->groupBy('category')
+        ->orderByDesc('total')
         ->get();
 
     return view('dashboard', [
@@ -29,33 +82,89 @@ Route::get('/dashboard', function () {
         'totalAmount' => $totalAmount,
         'thisMonthAmount' => $thisMonthAmount,
         'recentExpenses' => $recentExpenses,
+        'monthlyChartLabels' => $monthlyRows->pluck('month')->values(),
+        'monthlyChartValues' => $monthlyRows->pluck('total')->map(fn ($v) => (float) $v)->values(),
+        'categoryChartLabels' => $categoryRows->pluck('category')->values(),
+        'categoryChartValues' => $categoryRows->pluck('total')->map(fn ($v) => (float) $v)->values(),
+        'availableProjects' => $availableProjects,
+        'selectedProjectName' => $selectedProjectName,
+        'sidebarProjectName' => 'GAURA',
+        'sidebarProjectSubtitle' => 'GAURA',
     ]);
 })->name('dashboard');
 
-Route::get('/analytics', function () {
-    $totalAmount = (float) Expense::sum('amount');
+Route::get('/dashboard', function () {
+    return redirect()->route('dashboard');
+});
 
-    $categoryTotals = Expense::query()
+Route::get('/analytics', function () {
+    $availableProjects = Project::orderBy('name')->pluck('name');
+    $requestedProject = request('active_project', request('project_name'));
+
+    if ($requestedProject !== null) {
+        if ($requestedProject === '') {
+            session()->forget('active_project');
+        } elseif ($availableProjects->contains($requestedProject)) {
+            session(['active_project' => $requestedProject]);
+        }
+    }
+
+    $selectedProjectName = session('active_project');
+    if ($selectedProjectName && !$availableProjects->contains($selectedProjectName)) {
+        $selectedProjectName = null;
+        session()->forget('active_project');
+    }
+
+    $analyticsExpenses = Expense::query()
+        ->when($selectedProjectName, fn ($query) => $query->where('project_name', $selectedProjectName));
+
+    $totalAmount = (float) (clone $analyticsExpenses)->sum('amount');
+
+    $categoryTotals = (clone $analyticsExpenses)
         ->selectRaw('category, SUM(amount) as total')
         ->groupBy('category')
         ->orderByDesc('total')
         ->get();
 
-    $paymentTotals = Expense::query()
+    $paymentTotals = (clone $analyticsExpenses)
         ->selectRaw('payment_type, SUM(amount) as total')
         ->groupBy('payment_type')
         ->get()
         ->keyBy('payment_type');
 
-    $directorTotals = Expense::query()
-        ->selectRaw('director_name, SUM(amount) as total')
+    $directorTotals = (clone $analyticsExpenses)
+        ->selectRaw("director_name,
+            SUM(CASE WHEN director_fund_source = 'cash_in_hand' THEN amount ELSE 0 END) as hand_total,
+            SUM(CASE WHEN director_fund_source = 'bank_balance' THEN amount ELSE 0 END) as bank_total,
+            SUM(amount) as total")
         ->where('payment_type', 'director_paid')
         ->whereNotNull('director_name')
         ->groupBy('director_name')
         ->orderByDesc('total')
         ->get();
 
-    $monthlyTotals = Expense::query()
+    $directorNames = ['Buddhika', 'Nilitha', 'Vihaga'];
+
+    $directorHandExpenseTables = collect($directorNames)->map(function (string $directorName) use ($selectedProjectName) {
+        $rows = Expense::query()
+            ->select(['expense_date', 'project_name', 'title', 'amount'])
+            ->where('payment_type', 'director_paid')
+            ->where('director_fund_source', 'cash_in_hand')
+            ->where('director_name', $directorName)
+            ->when($selectedProjectName, fn ($query) => $query->where('project_name', $selectedProjectName))
+            ->latest('expense_date')
+            ->latest('id')
+            ->take(10)
+            ->get();
+
+        return [
+            'director_name' => $directorName,
+            'total' => (float) $rows->sum('amount'),
+            'rows' => $rows,
+        ];
+    });
+
+    $monthlyTotals = (clone $analyticsExpenses)
         ->selectRaw("strftime('%Y-%m', expense_date) as month, SUM(amount) as total")
         ->groupBy('month')
         ->orderBy('month')
@@ -67,14 +176,38 @@ Route::get('/analytics', function () {
         'companyPaidTotal' => (float) optional($paymentTotals->get('company_paid'))->total,
         'directorPaidTotal' => (float) optional($paymentTotals->get('director_paid'))->total,
         'directorTotals' => $directorTotals,
+        'directorHandExpenseTables' => $directorHandExpenseTables,
         'monthlyTotals' => $monthlyTotals,
+        'availableProjects' => $availableProjects,
+        'selectedProjectName' => $selectedProjectName,
+        'sidebarProjectName' => 'GAURA',
+        'sidebarProjectSubtitle' => 'GAURA',
     ]);
 })->name('analytics');
 
 Route::get('/projects', function () {
     $allProjects = Project::orderBy('name')->get();
+    $availableProjects = $allProjects->pluck('name');
+    $requestedProject = request('active_project');
 
-    $expenseAggregates = Expense::query()
+    if ($requestedProject !== null) {
+        if ($requestedProject === '') {
+            session()->forget('active_project');
+        } elseif ($availableProjects->contains($requestedProject)) {
+            session(['active_project' => $requestedProject]);
+        }
+    }
+
+    $selectedProjectName = session('active_project');
+    if ($selectedProjectName && !$availableProjects->contains($selectedProjectName)) {
+        $selectedProjectName = null;
+        session()->forget('active_project');
+    }
+
+    $projectFilteredExpenses = Expense::query()
+        ->when($selectedProjectName, fn ($query) => $query->where('project_name', $selectedProjectName));
+
+    $expenseAggregates = (clone $projectFilteredExpenses)
         ->selectRaw('project_name, COUNT(*) as expense_count, SUM(amount) as total')
         ->whereNotNull('project_name')
         ->where('project_name', '!=', '')
@@ -82,17 +215,19 @@ Route::get('/projects', function () {
         ->get()
         ->keyBy('project_name');
 
-    $projects = $allProjects->map(fn ($p) => (object) [
+    $projects = $allProjects
+        ->when($selectedProjectName, fn ($collection) => $collection->where('name', $selectedProjectName))
+        ->map(fn ($p) => (object) [
         'project_name'  => $p->name,
         'expense_count' => (int) optional($expenseAggregates->get($p->name))->expense_count,
         'total'         => (float) optional($expenseAggregates->get($p->name))->total,
     ]);
 
-    $unassignedCount = Expense::query()
+    $unassignedCount = (clone $projectFilteredExpenses)
         ->where(fn ($q) => $q->whereNull('project_name')->orWhere('project_name', ''))
         ->count();
 
-    $recentExpenses = Expense::query()
+    $recentExpenses = (clone $projectFilteredExpenses)
         ->whereNotNull('project_name')
         ->where('project_name', '!=', '')
         ->latest('expense_date')
@@ -104,6 +239,10 @@ Route::get('/projects', function () {
         'projects'        => $projects,
         'unassignedCount' => $unassignedCount,
         'recentExpenses'  => $recentExpenses,
+        'availableProjects' => $availableProjects,
+        'selectedProjectName' => $selectedProjectName,
+        'sidebarProjectName' => 'GAURA',
+        'sidebarProjectSubtitle' => 'GAURA',
     ]);
 })->name('projects');
 
@@ -116,3 +255,29 @@ Route::post('/projects', function (Request $request) {
 
     return redirect()->route('projects')->with('success', 'Project "' . trim($request->input('name')) . '" created.');
 })->name('projects.store');
+
+Route::get('/settings', function () {
+    $availableProjects = Project::orderBy('name')->pluck('name');
+    $requestedProject = request('active_project');
+
+    if ($requestedProject !== null) {
+        if ($requestedProject === '') {
+            session()->forget('active_project');
+        } elseif ($availableProjects->contains($requestedProject)) {
+            session(['active_project' => $requestedProject]);
+        }
+    }
+
+    $selectedProjectName = session('active_project');
+    if ($selectedProjectName && !$availableProjects->contains($selectedProjectName)) {
+        $selectedProjectName = null;
+        session()->forget('active_project');
+    }
+
+    return view('settings', [
+        'availableProjects' => $availableProjects,
+        'selectedProjectName' => $selectedProjectName,
+        'sidebarProjectName' => 'GAURA',
+        'sidebarProjectSubtitle' => 'GAURA',
+    ]);
+})->name('settings');

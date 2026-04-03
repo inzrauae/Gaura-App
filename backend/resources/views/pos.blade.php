@@ -3,7 +3,7 @@
 <html lang="en"><head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>ConstructSafe - Add Expense</title>
+<title>GAURA - Add Expense</title>
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
@@ -78,23 +78,44 @@
     .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    body.dark { background: #0b1220; color: #e5e7eb; }
+    body.dark aside, body.dark header { background: #111827 !important; color: #e5e7eb; }
+    body.dark .bg-white, body.dark .bg-surface-container-lowest { background: #1f2937 !important; }
+    body.dark .bg-surface-container, body.dark .bg-surface-container-low, body.dark .bg-surface-dim { background: #111827 !important; }
+    body.dark .border-surface-container-high, body.dark .border-outline-variant { border-color: #374151 !important; }
+    body.dark .text-on-surface-variant { color: #9ca3af !important; }
+    body.dark .text-[#434654] { color: #d1d5db !important; }
+    body.dark .bg-[#f2f3ff] { background: #1f2937 !important; }
+    .theme-toggle { border: 1px solid #d1d5db; }
+    body.dark .theme-toggle { border-color: #374151; color: #e5e7eb; background: #111827; }
   </style>
 </head>
 <body class="bg-surface text-on-surface font-body">
 <!-- SideNavBar -->
+<meta name="theme-color" content="#003d9b"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="default"/>
 <aside class="fixed left-0 top-0 flex flex-col h-full z-40 bg-[#faf8ff] dark:bg-slate-950 h-screen w-64 border-r-0 shadow-[8px_0_24px_rgba(19,27,46,0.06)] hidden md:flex">
 <div class="px-6 py-8">
-<div class="text-lg font-bold text-[#003d9b] font-headline mb-8">ConstructSafe</div>
+<div class="text-lg font-bold text-[#003d9b] font-headline mb-8">GAURA</div>
 <div class="mb-8 p-4 bg-[#f2f3ff] dark:bg-slate-900 rounded-xl">
 <div class="flex items-center gap-3">
 <div class="w-10 h-10 rounded-lg bg-primary-container flex items-center justify-center text-on-primary">
 <span class="material-symbols-outlined" data-icon="architecture">architecture</span>
 </div>
 <div>
-<div class="text-sm font-bold font-headline leading-tight">Project Alpha</div>
-<div class="text-xs text-on-surface-variant">Site 102 - London</div>
+<div class="text-sm font-bold font-headline leading-tight">{{ $sidebarProjectName }}</div>
+<div class="text-xs text-on-surface-variant">{{ $sidebarProjectSubtitle }}</div>
 </div>
 </div>
+<form action="{{ route('expenses.create') }}" method="GET" class="mt-3">
+<select name="active_project" onchange="this.form.submit()" class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-600 focus:border-[#003d9b] focus:ring-[#003d9b]">
+<option value="">All Projects</option>
+@foreach($availableProjects as $projectName)
+<option value="{{ $projectName }}" {{ $selectedProjectName === $projectName ? 'selected' : '' }}>{{ $projectName }}</option>
+@endforeach
+</select>
+</form>
 </div>
 <nav class="space-y-1">
 <a class="flex items-center gap-3 px-4 py-3 rounded-lg text-[#434654] dark:text-slate-400 hover:bg-[#f2f3ff] dark:hover:bg-slate-800 transition-colors" href="{{ route('dashboard') }}">
@@ -113,7 +134,7 @@
 <span class="material-symbols-outlined" data-icon="architecture">architecture</span>
 <span class="text-sm font-medium">Projects</span>
 </a>
-<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-[#434654] dark:text-slate-400 hover:bg-[#f2f3ff] dark:hover:bg-slate-800 transition-colors" href="#">
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-[#434654] dark:text-slate-400 hover:bg-[#f2f3ff] dark:hover:bg-slate-800 transition-colors" href="{{ route('settings') }}">
 <span class="material-symbols-outlined" data-icon="settings">settings</span>
 <span class="text-sm font-medium">Settings</span>
 </a>
@@ -129,7 +150,7 @@
 <!-- Main Content Wrapper -->
 <div class="md:ml-64 flex flex-col min-h-screen">
 <!-- TopNavBar -->
-<header class="bg-[#faf8ff] dark:bg-slate-900 sticky top-0 z-30 flex justify-between items-center w-full px-6 py-3 max-w-full mx-auto">
+<header class="sticky top-0 z-30 flex w-full items-center justify-between bg-[#faf8ff] px-6 py-3">
 <div class="flex items-center gap-8">
 <div class="md:hidden text-xl font-black text-[#003d9b] font-headline">CS</div>
 <nav class="hidden md:flex items-center gap-6">
@@ -139,6 +160,7 @@
 </nav>
 </div>
 <div class="flex items-center gap-4">
+<button id="theme-toggle" class="theme-toggle rounded-lg px-3 py-2 text-sm font-semibold" type="button">Dark</button>
 <div class="relative hidden sm:block">
 <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-sm" data-icon="search">search</span>
 <input class="pl-10 pr-4 py-2 bg-[#f2f3ff] dark:bg-slate-800/50 border-none rounded-full text-sm focus:ring-2 focus:ring-primary w-64" placeholder="Search records..." type="text"/>
@@ -146,16 +168,16 @@
 <button class="w-10 h-10 flex items-center justify-center text-[#434654] hover:bg-[#e2e7ff] rounded-full transition-colors">
 <span class="material-symbols-outlined" data-icon="notifications">notifications</span>
 </button>
-<button class="w-10 h-10 flex items-center justify-center text-[#434654] hover:bg-[#e2e7ff] rounded-full transition-colors">
+<a class="w-10 h-10 flex items-center justify-center text-[#434654] hover:bg-[#e2e7ff] rounded-full transition-colors" href="{{ route('settings') }}">
 <span class="material-symbols-outlined" data-icon="settings">settings</span>
-</button>
+</a>
 <div class="w-10 h-10 rounded-full bg-surface-container overflow-hidden border-2 border-white shadow-sm">
 <img alt="User profile avatar" class="w-full h-full object-cover" data-alt="portrait of a male construction engineer in a professional environment with warm lighting and soft background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCzA__68tNZLgNy3c9OW141FuFVRyv1mPkS7y2uvTBeJb2_YwH848y2BF8GW33gYpVDFqFYi8mlzvariIm395IkUPRZmm-OUySDk-2NUvcDEs4vXWHKemMnSmizN5lNPq64Kwc5thyCoUMpZxbLidbfZnqvJhFqkd28VNQeHJhnNMVZvGn6uKg8Q8ilzudGwCzWHbgDVpB-cbW6nrUSG6LG-hAzO4Bl9sS3CZIfUXuh9-x6JlpUUkwZxHL9hzvif149HnKLfeJptDwH"/>
 </div>
 </div>
 </header>
 <!-- Content Canvas -->
-<main class="flex-1 p-6 md:p-12 max-w-5xl w-full mx-auto">
+<main class="mx-auto w-full max-w-6xl flex-1 p-6 pb-24 md:p-10 md:pb-10">
 <!-- Page Header -->
 <div class="mb-10">
 <h1 class="text-3xl font-extrabold text-on-background tracking-tight mb-2">Add New Expense</h1>
@@ -198,7 +220,7 @@
 <select class="w-full bg-surface-container-low border-0 border-b-2 border-transparent focus:border-primary focus:ring-0 px-4 py-3 rounded-lg text-sm transition-all appearance-none" id="project-name">
 <option value="">— No Project —</option>
 @foreach($availableProjects as $proj)
-<option value="{{ $proj }}">{{ $proj }}</option>
+<option value="{{ $proj }}" {{ $selectedProjectName === $proj ? 'selected' : '' }}>{{ $proj }}</option>
 @endforeach
 </select>
 </div>
@@ -254,6 +276,16 @@
 <option value="Nilitha">Nilitha</option>
 <option value="Vihaga">Vihaga</option>
 </select>
+
+<label class="pt-2 text-xs font-bold uppercase tracking-wider text-on-surface-variant flex items-center gap-2">
+<span class="material-symbols-outlined text-sm" data-icon="wallet">wallet</span>
+                  Paid From
+                </label>
+<select class="w-full bg-surface-container-low border-0 border-b-2 border-transparent focus:border-primary focus:ring-0 px-4 py-3 rounded-lg text-sm transition-all appearance-none" id="director-fund-source">
+<option value="">Select Source</option>
+<option value="cash_in_hand">Cash in Hand</option>
+<option value="bank_balance">Bank Balance</option>
+</select>
 </div>
 </div>
 <!-- Notes Field -->
@@ -286,7 +318,7 @@
                 Pro Tip
               </h4>
 <p class="text-xs text-on-surface-variant leading-relaxed">
-                Categorizing expenses by <strong>Equipment</strong> automatically triggers a maintenance log entry for Project Alpha.
+                Categorizing expenses by <strong>Equipment</strong> helps you track maintenance-related costs for {{ $sidebarProjectName }}.
               </p>
 </div>
 <span class="material-symbols-outlined absolute -bottom-4 -right-4 text-8xl text-surface-container opacity-20 rotate-12" data-icon="receipt">receipt</span>
@@ -324,10 +356,10 @@
 <span class="material-symbols-outlined" data-icon="bar_chart">bar_chart</span>
 <span class="text-[10px] font-medium">Reports</span>
 </a>
-<button class="flex flex-col items-center gap-1 text-on-surface-variant">
+<a class="flex flex-col items-center gap-1 text-on-surface-variant" href="{{ route('settings') }}">
 <span class="material-symbols-outlined" data-icon="settings">settings</span>
 <span class="text-[10px] font-medium">Settings</span>
-</button>
+</a>
 </nav>
 <script>
   const apiBaseUrl = `${window.location.origin}/api`;
@@ -339,6 +371,7 @@
   const reimbursementNote = document.getElementById("reimbursement-note");
   const directorField = document.getElementById("director-field");
   const directorNameInput = document.getElementById("director-name");
+  const directorFundSourceInput = document.getElementById("director-fund-source");
   const receiptDropzone = document.getElementById("receipt-dropzone");
   const receiptInput = document.getElementById("receipt-file");
   const receiptFileName = document.getElementById("receipt-file-name");
@@ -355,8 +388,11 @@
     if (isCompany) {
       directorNameInput.value = "";
       directorNameInput.removeAttribute("required");
+      directorFundSourceInput.value = "";
+      directorFundSourceInput.removeAttribute("required");
     } else {
       directorNameInput.setAttribute("required", "required");
+      directorFundSourceInput.setAttribute("required", "required");
     }
 
     companyBtn.className = isCompany
@@ -390,6 +426,7 @@
     const amount = document.getElementById("expense-amount").value;
     const notes = document.getElementById("expense-notes").value;
     const directorName = directorNameInput.value;
+    const directorFundSource = directorFundSourceInput.value;
 
     if (!expenseDate || !category || !title || !amount) {
       statusText.textContent = "Please fill in all required fields (Date, Category, Title, Amount)";
@@ -405,6 +442,13 @@
       return;
     }
 
+    if (paymentTypeInput.value === "director_paid" && !directorFundSource) {
+      statusText.textContent = "Please select paid source for director-paid expenses.";
+      statusText.className = "mt-4 text-sm font-semibold text-red-700";
+      saveBtn.disabled = false;
+      return;
+    }
+
     const payload = new FormData();
     payload.append("project_name", document.getElementById("project-name").value);
     payload.append("expense_date", expenseDate);
@@ -413,6 +457,7 @@
     payload.append("amount", amount);
     payload.append("payment_type", paymentTypeInput.value);
     payload.append("director_name", directorName);
+    payload.append("director_fund_source", directorFundSource);
     payload.append("notes", notes);
 
     if (receiptInput.files.length > 0) {
@@ -423,14 +468,21 @@
       console.log("Submitting to:", `${apiBaseUrl}/expenses`);
       const response = await fetch(`${apiBaseUrl}/expenses`, {
         method: "POST",
+        headers: {
+          "Accept": "application/json",
+          "X-Requested-With": "XMLHttpRequest",
+        },
         body: payload,
       });
 
-      const result = await response.json();
+      const contentType = response.headers.get("content-type") || "";
+      const result = contentType.includes("application/json")
+        ? await response.json()
+        : { message: await response.text() };
       console.log("Response:", result, "Status:", response.status);
 
       if (!response.ok) {
-        const errorMsg = result.message || result.errors || "Failed to save expense.";
+        const errorMsg = result.message || result.errors || `Request failed (${response.status}).`;
         throw new Error(typeof errorMsg === 'string' ? errorMsg : JSON.stringify(errorMsg));
       }
 
@@ -454,5 +506,19 @@
   document.getElementById("expense-date").value = new Date().toISOString().split('T')[0];
 
   setPaymentType("company_paid");
+
+  (function () {
+    const key = 'gaura_theme';
+    const saved = localStorage.getItem(key);
+    if (saved === 'dark') document.body.classList.add('dark');
+    const btn = document.getElementById('theme-toggle');
+    const sync = () => { btn.textContent = document.body.classList.contains('dark') ? 'Light' : 'Dark'; };
+    sync();
+    btn.addEventListener('click', function () {
+      document.body.classList.toggle('dark');
+      localStorage.setItem(key, document.body.classList.contains('dark') ? 'dark' : 'light');
+      sync();
+    });
+  })();
 </script>
 </body></html>
