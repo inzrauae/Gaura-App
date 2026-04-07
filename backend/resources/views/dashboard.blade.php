@@ -66,6 +66,10 @@
           <span class="material-symbols-outlined">bar_chart</span>
           <span class="text-sm font-medium">Cost Insights</span>
         </a>
+        <a class="flex items-center gap-3 rounded-lg border-r-4 border-transparent px-4 py-3 text-[#434654] hover:bg-[#f2f3ff]" href="{{ route('reports') }}">
+          <span class="material-symbols-outlined">assessment</span>
+          <span class="text-sm font-medium">Reports</span>
+        </a>
         <a class="flex items-center gap-3 rounded-lg border-r-4 border-transparent px-4 py-3 text-[#434654] hover:bg-[#f2f3ff]" href="{{ route('clients') }}">
           <span class="material-symbols-outlined">groups</span>
           <span class="text-sm font-medium">Clients</span>
@@ -85,54 +89,54 @@
   </aside>
 
   <div class="flex min-h-screen flex-col md:ml-64">
-    <header class="sticky top-0 z-30 flex w-full items-center justify-between bg-[#faf8ff] px-6 py-3">
+    <header class="sticky top-0 z-30 flex w-full items-center justify-between bg-[#faf8ff] px-4 py-3 md:px-6">
       <div class="text-xl font-black text-[#003d9b] md:hidden">GA</div>
       <nav class="hidden items-center gap-6 md:flex">
         <a class="font-bold text-[#003d9b] border-b-2 border-[#003d9b] pb-1" href="{{ route('dashboard') }}">Dashboard</a>
         <a class="text-[#434654] hover:bg-[#e2e7ff] rounded px-2 py-1" href="{{ route('expenses.create') }}">Site Costs</a>
       </nav>
       <div class="flex items-center gap-2">
-        <a class="rounded-lg bg-[#003d9b] px-4 py-2 text-sm font-semibold text-white" href="{{ route('expenses.create') }}">Add Cost</a>
+        <a class="rounded-lg bg-[#003d9b] px-3 py-2 text-sm font-semibold text-white md:px-4" href="{{ route('expenses.create') }}">Add Cost</a>
       </div>
     </header>
 
-    <main class="mx-auto w-full max-w-6xl flex-1 p-6 pb-24 md:p-10 md:pb-10">
+    <main class="mx-auto w-full max-w-6xl flex-1 p-4 pb-28 md:p-10 md:pb-10">
       <div class="mb-8">
-        <h1 class="text-3xl font-extrabold text-[#003d9b]">Construction Cost Dashboard</h1>
+        <h1 class="text-2xl font-extrabold text-[#003d9b] md:text-3xl">Construction Cost Dashboard</h1>
         <p class="text-sm text-slate-600">Overview of site spending, trends, and recent cost entries.</p>
       </div>
 
       <section class="mb-8 grid grid-cols-1 gap-4 md:grid-cols-3">
-        <div class="rounded-xl border border-slate-100 bg-white p-5 shadow-sm">
+        <div class="rounded-xl border border-slate-100 bg-white p-4 shadow-sm md:p-5">
           <p class="text-sm text-slate-500">Total Records</p>
           <p class="mt-2 text-3xl font-extrabold">{{ $totalExpenses }}</p>
         </div>
-        <div class="rounded-xl border border-slate-100 bg-white p-5 shadow-sm">
+        <div class="rounded-xl border border-slate-100 bg-white p-4 shadow-sm md:p-5">
           <p class="text-sm text-slate-500">Total Amount</p>
           <p class="mt-2 text-3xl font-extrabold">LKR {{ number_format((float) $totalAmount, 2) }}</p>
         </div>
-        <div class="rounded-xl border border-slate-100 bg-white p-5 shadow-sm">
+        <div class="rounded-xl border border-slate-100 bg-white p-4 shadow-sm md:p-5">
           <p class="text-sm text-slate-500">This Month</p>
           <p class="mt-2 text-3xl font-extrabold">LKR {{ number_format((float) $thisMonthAmount, 2) }}</p>
         </div>
       </section>
 
       <section class="mb-8 grid grid-cols-1 gap-6 lg:grid-cols-3">
-        <div class="overflow-hidden rounded-xl border border-slate-100 bg-white p-5 shadow-sm lg:col-span-2">
+        <div class="overflow-hidden rounded-xl border border-slate-100 bg-white p-4 shadow-sm lg:col-span-2 md:p-5">
           <div class="mb-4 flex items-center justify-between">
             <h2 class="text-lg font-bold">Monthly Expense Trend</h2>
             <span class="rounded-full bg-[#e2e7ff] px-3 py-1 text-xs font-semibold text-[#003d9b]">Live Data</span>
           </div>
-          <div class="h-72">
+          <div class="h-64 md:h-72">
             <canvas id="monthly-trend-chart"></canvas>
           </div>
         </div>
-        <div class="overflow-hidden rounded-xl border border-slate-100 bg-white p-5 shadow-sm">
+        <div class="overflow-hidden rounded-xl border border-slate-100 bg-white p-4 shadow-sm md:p-5">
           <div class="mb-4 flex items-center justify-between">
             <h2 class="text-lg font-bold">Category Split</h2>
             <span class="rounded-full bg-[#e2e7ff] px-3 py-1 text-xs font-semibold text-[#003d9b]">Top Categories</span>
           </div>
-          <div class="h-72">
+          <div class="h-64 md:h-72">
             <canvas id="category-split-chart"></canvas>
           </div>
         </div>
@@ -142,7 +146,47 @@
         <div class="border-b border-slate-100 px-5 py-4">
           <h2 class="text-lg font-bold">Recent Costs</h2>
         </div>
-        <div class="overflow-x-auto">
+        <div class="space-y-3 p-4 md:hidden">
+          @forelse($recentExpenses as $expense)
+            <article class="rounded-xl border border-slate-100 bg-slate-50 p-4 shadow-sm">
+              <div class="flex items-start justify-between gap-3">
+                <div>
+                  <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">{{ optional($expense->expense_date)->format('Y-m-d') }}</p>
+                  <h3 class="mt-1 font-bold text-slate-900">{{ $expense->title }}</h3>
+                </div>
+                <p class="text-right text-sm font-extrabold text-[#003d9b]">LKR {{ number_format((float) $expense->amount, 2) }}</p>
+              </div>
+              <div class="mt-3 grid grid-cols-2 gap-3 text-xs text-slate-600">
+                <div>
+                  <p class="font-semibold uppercase tracking-wide text-slate-500">Category</p>
+                  <p class="mt-1">{{ $expense->category }}</p>
+                </div>
+                <div>
+                  <p class="font-semibold uppercase tracking-wide text-slate-500">Payment</p>
+                  <p class="mt-1">{{ str_replace('_', ' ', ucfirst($expense->payment_type)) }}</p>
+                </div>
+                <div>
+                  <p class="font-semibold uppercase tracking-wide text-slate-500">Director</p>
+                  <p class="mt-1">{{ $expense->director_name ?? '-' }}</p>
+                </div>
+                <div>
+                  <p class="font-semibold uppercase tracking-wide text-slate-500">Receipt</p>
+                  @if($expense->receipt_path)
+                    <a class="mt-1 inline-flex items-center gap-1 font-semibold text-[#003d9b]" href="{{ url('/storage/' . $expense->receipt_path) }}" target="_blank" rel="noopener noreferrer">
+                      <span class="material-symbols-outlined text-base">description</span>
+                      View
+                    </a>
+                  @else
+                    <p class="mt-1">No receipt</p>
+                  @endif
+                </div>
+              </div>
+            </article>
+          @empty
+            <p class="rounded-xl bg-slate-50 px-4 py-6 text-center text-sm text-slate-500">No costs saved yet.</p>
+          @endforelse
+        </div>
+        <div class="hidden overflow-x-auto md:block">
           <table class="w-full text-sm">
             <thead class="bg-slate-50 text-slate-600">
               <tr>

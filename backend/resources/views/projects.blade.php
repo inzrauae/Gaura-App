@@ -65,6 +65,10 @@
           <span class="material-symbols-outlined">bar_chart</span>
           <span class="text-sm font-medium">Cost Insights</span>
         </a>
+        <a class="flex items-center gap-3 rounded-lg border-r-4 border-transparent px-4 py-3 text-[#434654] hover:bg-[#f2f3ff]" href="{{ route('reports') }}">
+          <span class="material-symbols-outlined">assessment</span>
+          <span class="text-sm font-medium">Reports</span>
+        </a>
         <a class="flex items-center gap-3 rounded-lg border-r-4 border-transparent px-4 py-3 text-[#434654] hover:bg-[#f2f3ff]" href="{{ route('clients') }}">
           <span class="material-symbols-outlined">groups</span>
           <span class="text-sm font-medium">Clients</span>
@@ -84,7 +88,7 @@
   </aside>
 
   <div class="flex min-h-screen flex-col md:ml-64">
-    <header class="sticky top-0 z-30 flex w-full items-center justify-between bg-[#faf8ff] px-6 py-3">
+    <header class="sticky top-0 z-30 flex w-full items-center justify-between bg-[#faf8ff] px-4 py-3 md:px-6">
       <div class="text-xl font-black text-[#003d9b] md:hidden">GA</div>
       <nav class="hidden items-center gap-6 md:flex">
         <a class="font-bold text-[#003d9b] border-b-2 border-[#003d9b] pb-1" href="{{ route('projects') }}">Sites</a>
@@ -92,18 +96,18 @@
         <a class="text-[#434654] hover:bg-[#e2e7ff] rounded px-2 py-1" href="{{ route('analytics') }}">Cost Insights</a>
       </nav>
       <div class="flex items-center gap-2">
-        <a class="rounded-lg bg-[#003d9b] px-4 py-2 text-sm font-semibold text-white" href="{{ route('expenses.create') }}">Add Cost</a>
+        <a class="rounded-lg bg-[#003d9b] px-3 py-2 text-sm font-semibold text-white md:px-4" href="{{ route('expenses.create') }}">Add Cost</a>
       </div>
     </header>
 
-    <main class="mx-auto w-full max-w-6xl flex-1 p-6 pb-24 md:p-10 md:pb-10">
-      <div class="mb-8 flex flex-wrap items-start justify-between gap-4">
+    <main class="mx-auto w-full max-w-6xl flex-1 p-4 pb-28 md:p-10 md:pb-10">
+      <div class="mb-8 flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between">
         <div>
-          <h1 class="text-3xl font-extrabold text-[#003d9b]">Sites</h1>
+          <h1 class="text-2xl font-extrabold text-[#003d9b] md:text-3xl">Sites</h1>
           <p class="text-sm text-slate-600">Cost breakdown by construction site.</p>
         </div>
         <button onclick="document.getElementById('new-project-modal').classList.remove('hidden')"
-                class="flex items-center gap-2 rounded-lg bg-[#003d9b] px-4 py-2 text-sm font-semibold text-white hover:bg-[#0040a2] transition-colors">
+                class="flex w-full items-center justify-center gap-2 rounded-lg bg-[#003d9b] px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#0040a2] sm:w-auto">
           <span class="material-symbols-outlined text-base">add</span>
           New Site
         </button>
@@ -181,7 +185,27 @@
           <div class="border-b border-slate-100 px-5 py-4">
             <h2 class="text-lg font-bold">Site Costs</h2>
           </div>
-          <div class="overflow-x-auto">
+          <div class="space-y-3 p-4 md:hidden">
+            @forelse($recentExpenses as $expense)
+              <article class="rounded-xl border border-slate-100 bg-slate-50 p-4 shadow-sm">
+                <div class="flex items-start justify-between gap-3">
+                  <div>
+                    <p class="text-[11px] font-semibold uppercase tracking-wide text-slate-500">{{ optional($expense->expense_date)->format('Y-m-d') }}</p>
+                    <h3 class="mt-1 font-bold text-slate-900">{{ $expense->title }}</h3>
+                    <p class="mt-1 text-sm text-slate-600">{{ $expense->project_name }}</p>
+                  </div>
+                  <p class="text-right text-sm font-extrabold text-[#003d9b]">LKR {{ number_format((float) $expense->amount, 2) }}</p>
+                </div>
+                <div class="mt-3 flex flex-wrap items-center gap-2 text-xs">
+                  <span class="rounded-full bg-[#e2e7ff] px-2 py-1 font-semibold text-[#003d9b]">{{ $expense->category }}</span>
+                  <span class="text-slate-500">Director: {{ $expense->director_name ?? '—' }}</span>
+                </div>
+              </article>
+            @empty
+              <p class="rounded-xl bg-slate-50 px-4 py-6 text-center text-sm text-slate-400">No site costs yet.</p>
+            @endforelse
+          </div>
+          <div class="hidden overflow-x-auto md:block">
             <table class="w-full text-sm">
               <thead class="bg-slate-50 text-slate-600">
                 <tr>
@@ -230,7 +254,7 @@
 
   {{-- New Project Modal --}}
   <div id="new-project-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
-    <div class="w-full max-w-md rounded-2xl bg-white p-8 shadow-2xl">
+    <div class="w-full max-w-md rounded-2xl bg-white p-5 shadow-2xl md:p-8">
       <div class="mb-6 flex items-center justify-between">
         <h2 class="text-xl font-extrabold text-[#003d9b]">New Project</h2>
         <button onclick="document.getElementById('new-project-modal').classList.add('hidden')"
@@ -246,7 +270,7 @@
                  placeholder="e.g., Galle Road Site 102"
                  class="w-full rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm focus:border-[#003d9b] focus:ring-1 focus:ring-[#003d9b] outline-none" />
         </div>
-        <div class="flex gap-3">
+        <div class="flex flex-col gap-3 sm:flex-row">
           <button type="submit"
                   class="flex-1 rounded-lg bg-[#003d9b] py-3 text-sm font-bold text-white hover:bg-[#0040a2] transition-colors">
             Create Project

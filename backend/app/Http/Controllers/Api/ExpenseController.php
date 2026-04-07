@@ -48,8 +48,13 @@ class ExpenseController extends Controller
             $validated['director_fund_source'] = null;
         }
 
-        if ($request->hasFile('receipt')) {
-            $validated['receipt_path'] = $request->file('receipt')->store('receipts', 'public');
+        try {
+            if ($request->hasFile('receipt') && $request->file('receipt')->isValid()) {
+                $validated['receipt_path'] = $request->file('receipt')->store('receipts', 'public');
+            }
+        } catch (\Exception $e) {
+            // Log the error but don't fail the request
+            \Log::error('Failed to store receipt: ' . $e->getMessage());
         }
 
         unset($validated['receipt']);
@@ -85,12 +90,17 @@ class ExpenseController extends Controller
             $validated['director_fund_source'] = null;
         }
 
-        if ($request->hasFile('receipt')) {
-            if ($expense->receipt_path) {
-                Storage::disk('public')->delete($expense->receipt_path);
-            }
+        try {
+            if ($request->hasFile('receipt') && $request->file('receipt')->isValid()) {
+                if ($expense->receipt_path) {
+                    Storage::disk('public')->delete($expense->receipt_path);
+                }
 
-            $validated['receipt_path'] = $request->file('receipt')->store('receipts', 'public');
+                $validated['receipt_path'] = $request->file('receipt')->store('receipts', 'public');
+            }
+        } catch (\Exception $e) {
+            // Log the error but don't fail the request
+            \Log::error('Failed to store receipt: ' . $e->getMessage());
         }
 
         unset($validated['receipt']);

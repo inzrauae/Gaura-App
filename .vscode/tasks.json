@@ -1,0 +1,25 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Serve GAURA Backend (20MB uploads)",
+      "type": "shell",
+      "command": "php",
+      "args": [
+        "-d",
+        "upload_max_filesize=20M",
+        "-d",
+        "post_max_size=25M",
+        "backend/artisan",
+        "serve",
+        "--host=127.0.0.1",
+        "--port=8000"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "isBackground": true,
+      "problemMatcher": []
+    }
+  ]
+}

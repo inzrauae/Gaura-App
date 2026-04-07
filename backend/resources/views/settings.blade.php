@@ -65,6 +65,10 @@
           <span class="material-symbols-outlined">bar_chart</span>
           <span class="text-sm font-medium">Cost Insights</span>
         </a>
+        <a class="flex items-center gap-3 rounded-lg border-r-4 border-transparent px-4 py-3 text-[#434654] hover:bg-[#f2f3ff]" href="{{ route('reports') }}">
+          <span class="material-symbols-outlined">assessment</span>
+          <span class="text-sm font-medium">Reports</span>
+        </a>
         <a class="flex items-center gap-3 rounded-lg border-r-4 border-transparent px-4 py-3 text-[#434654] hover:bg-[#f2f3ff]" href="{{ route('clients') }}">
           <span class="material-symbols-outlined">groups</span>
           <span class="text-sm font-medium">Clients</span>
@@ -78,18 +82,18 @@
   </aside>
 
   <div class="flex min-h-screen flex-col md:ml-64">
-    <header class="sticky top-0 z-30 flex w-full items-center justify-between bg-[#faf8ff] px-6 py-3">
+    <header class="sticky top-0 z-30 flex w-full items-center justify-between bg-[#faf8ff] px-4 py-3 md:px-6">
       <div class="text-xl font-black text-[#003d9b] md:hidden">GA</div>
       <nav class="hidden items-center gap-6 md:flex">
         <a class="text-[#434654] hover:bg-[#e2e7ff] rounded px-2 py-1" href="{{ route('dashboard') }}">Dashboard</a>
         <a class="font-bold text-[#003d9b] border-b-2 border-[#003d9b] pb-1" href="{{ route('settings') }}">Settings</a>
       </nav>
-      <a class="rounded-lg bg-[#003d9b] px-4 py-2 text-sm font-semibold text-white" href="{{ route('expenses.create') }}">Add Cost</a>
+      <a class="rounded-lg bg-[#003d9b] px-3 py-2 text-sm font-semibold text-white md:px-4" href="{{ route('expenses.create') }}">Add Cost</a>
     </header>
 
-    <main class="mx-auto w-full max-w-6xl flex-1 p-6 pb-24 md:p-10 md:pb-10">
+    <main class="mx-auto w-full max-w-6xl flex-1 p-4 pb-28 md:p-10 md:pb-10">
       <div class="mb-8">
-        <h1 class="text-3xl font-extrabold text-[#003d9b]">Settings</h1>
+        <h1 class="text-2xl font-extrabold text-[#003d9b] md:text-3xl">Settings</h1>
         <p class="text-sm text-slate-600">Manage construction app preferences and active site context.</p>
       </div>
 

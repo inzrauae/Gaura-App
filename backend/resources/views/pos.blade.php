@@ -3,6 +3,7 @@
 <html lang="en"><head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<meta name="csrf-token" content="{{ csrf_token() }}"/>
 <title>GAURA - Construction Cost Log</title>
 <link href="{{ asset('img/gaura-logo.png') }}" rel="icon" type="image/png"/>
 <link href="{{ asset('img/gaura-logo.png') }}" rel="apple-touch-icon"/>
@@ -129,6 +130,10 @@
 <span class="material-symbols-outlined" data-icon="bar_chart">bar_chart</span>
 <span class="text-sm font-medium">Cost Insights</span>
 </a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg border-r-4 border-transparent text-[#434654] hover:bg-[#f2f3ff] transition-colors" href="{{ route('reports') }}">
+<span class="material-symbols-outlined" data-icon="assessment">assessment</span>
+<span class="text-sm font-medium">Reports</span>
+</a>
 <a class="flex items-center gap-3 px-4 py-3 rounded-lg border-r-4 border-transparent text-[#434654] hover:bg-[#f2f3ff] transition-colors" href="{{ route('clients') }}">
 <span class="material-symbols-outlined" data-icon="groups">groups</span>
 <span class="text-sm font-medium">Clients</span>
@@ -149,8 +154,8 @@
 <!-- Main Content Wrapper -->
 <div class="md:ml-64 flex flex-col min-h-screen">
 <!-- TopNavBar -->
-<header class="sticky top-0 z-30 flex w-full items-center justify-between bg-[#faf8ff] px-6 py-3">
-<div class="flex items-center gap-8">
+<header class="sticky top-0 z-30 flex w-full items-center justify-between bg-[#faf8ff] px-4 py-3 md:px-6">
+<div class="flex items-center gap-4 md:gap-8">
 <div class="md:hidden text-xl font-black text-[#003d9b] font-headline">GA</div>
 <nav class="hidden md:flex items-center gap-6">
 <a class="text-[#434654] hover:bg-[#e2e7ff] transition-colors px-2 py-1 rounded" href="{{ route('projects') }}">Sites</a>
@@ -158,24 +163,24 @@
 <a class="text-[#434654] hover:bg-[#e2e7ff] transition-colors px-2 py-1 rounded" href="{{ route('analytics') }}">Cost Insights</a>
 </nav>
 </div>
-<div class="flex items-center gap-4">
+<div class="flex items-center gap-2 md:gap-4">
 <div class="relative hidden sm:block">
 <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-sm" data-icon="search">search</span>
 <input class="pl-10 pr-4 py-2 bg-[#f2f3ff] border-none rounded-full text-sm focus:ring-2 focus:ring-primary w-64" placeholder="Search costs..." type="text"/>
 </div>
-<button class="w-10 h-10 flex items-center justify-center text-[#434654] hover:bg-[#e2e7ff] rounded-full transition-colors">
+<button class="flex h-10 w-10 items-center justify-center rounded-full text-[#434654] transition-colors hover:bg-[#e2e7ff]">
 <span class="material-symbols-outlined" data-icon="notifications">notifications</span>
 </button>
 <a class="w-10 h-10 flex items-center justify-center text-[#434654] hover:bg-[#e2e7ff] rounded-full transition-colors" href="{{ route('settings') }}">
 <span class="material-symbols-outlined" data-icon="settings">settings</span>
 </a>
-<div class="w-10 h-10 rounded-full bg-surface-container overflow-hidden border-2 border-white shadow-sm">
+<div class="hidden h-10 w-10 overflow-hidden rounded-full border-2 border-white bg-surface-container shadow-sm sm:block">
 <img alt="User profile avatar" class="w-full h-full object-cover" data-alt="portrait of a male construction engineer in a professional environment with warm lighting and soft background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCzA__68tNZLgNy3c9OW141FuFVRyv1mPkS7y2uvTBeJb2_YwH848y2BF8GW33gYpVDFqFYi8mlzvariIm395IkUPRZmm-OUySDk-2NUvcDEs4vXWHKemMnSmizN5lNPq64Kwc5thyCoUMpZxbLidbfZnqvJhFqkd28VNQeHJhnNMVZvGn6uKg8Q8ilzudGwCzWHbgDVpB-cbW6nrUSG6LG-hAzO4Bl9sS3CZIfUXuh9-x6JlpUUkwZxHL9hzvif149HnKLfeJptDwH"/>
 </div>
 </div>
 </header>
 <!-- Content Canvas -->
-<main class="mx-auto w-full max-w-6xl flex-1 p-6 pb-24 md:p-10 md:pb-10">
+<main class="mx-auto w-full max-w-6xl flex-1 p-4 pb-28 md:p-10 md:pb-10">
 <section class="mb-6 rounded-xl border border-amber-200 bg-gradient-to-r from-amber-50 via-white to-slate-100 px-4 py-3 shadow-sm">
 <div class="flex items-center gap-3">
 <span class="material-symbols-outlined text-amber-600" style="font-variation-settings: 'FILL' 1;">engineering</span>
@@ -186,15 +191,15 @@
 </div>
 </section>
 <!-- Page Header -->
-<div class="mb-10">
-<h1 class="text-3xl font-extrabold text-on-background tracking-tight mb-2">Log Site Expense</h1>
+<div class="mb-8 md:mb-10">
+<h1 class="mb-2 text-2xl font-extrabold tracking-tight text-on-background md:text-3xl">Log Site Expense</h1>
 <p class="text-on-surface-variant">Capture construction spending across labor, materials, transport, and subcontractor work.</p>
 </div>
-<div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+<div class="grid grid-cols-1 items-start gap-6 lg:grid-cols-12 lg:gap-8">
 <!-- Main Form Panel -->
-<div class="lg:col-span-8 bg-surface-container-lowest rounded-xl p-8 shadow-sm">
+<div class="rounded-xl bg-surface-container-lowest p-5 shadow-sm lg:col-span-8 md:p-8">
 <form class="space-y-8" id="expense-form">
-<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<div class="grid grid-cols-1 gap-5 md:grid-cols-2 md:gap-6">
 <!-- Date Field -->
 <div class="space-y-2">
 <label class="text-xs font-bold uppercase tracking-wider text-on-surface-variant flex items-center gap-2">
@@ -317,13 +322,13 @@
 </form>
 </div>
 <!-- Receipt Panel (The Asymmetric Bento Style) -->
-<div class="lg:col-span-4 space-y-6">
+<div class="space-y-6 lg:col-span-4">
 <div class="bg-surface-container rounded-xl p-6 border-2 border-dashed border-outline-variant group hover:border-primary transition-colors cursor-pointer text-center" id="receipt-dropzone">
 <div class="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm group-hover:scale-110 transition-transform">
 <span class="material-symbols-outlined text-primary text-3xl" data-icon="upload_file">upload_file</span>
 </div>
 <h3 class="font-bold text-lg mb-1">Upload Invoice or Delivery Note</h3>
-<p class="text-xs text-on-surface-variant mb-4">PNG, JPG, or PDF up to 10MB</p>
+<p class="text-xs text-on-surface-variant mb-4">PNG, JPG, or PDF up to 20MB</p>
 <div class="text-xs font-bold text-primary py-2 px-4 bg-primary/10 rounded-full inline-block">Browse Files</div>
 <input accept=".png,.jpg,.jpeg,.pdf" class="hidden" id="receipt-file" type="file"/>
 <p class="mt-3 text-xs text-on-surface-variant" id="receipt-file-name">No file selected</p>
@@ -344,11 +349,11 @@
 </div>
 </div>
 <!-- Action Buttons (Fixed or Docked Style) -->
-<div class="mt-12 flex items-center justify-end gap-4 border-t border-surface-container-high pt-8">
+<div class="mt-10 flex flex-col-reverse gap-3 border-t border-surface-container-high pt-6 sm:mt-12 sm:flex-row sm:items-center sm:justify-end sm:gap-4 sm:pt-8">
 <button class="px-8 py-3 text-sm font-bold text-on-surface-variant hover:bg-surface-container-high transition-all rounded-lg" form="expense-form" type="reset">
           Cancel
         </button>
-<button class="bg-gradient-to-br from-primary to-primary-container text-white px-10 py-3 rounded-lg font-extrabold text-sm shadow-xl hover:shadow-primary/20 active:scale-95 transition-all" form="expense-form" id="save-expense-btn" type="submit">
+<button class="w-full rounded-lg bg-gradient-to-br from-primary to-primary-container px-10 py-3 text-sm font-extrabold text-white shadow-xl transition-all hover:shadow-primary/20 active:scale-95 sm:w-auto" form="expense-form" id="save-expense-btn" type="submit">
           Save Cost
         </button>
 </div>
@@ -358,7 +363,34 @@
 <div class="border-b border-slate-100 px-5 py-4">
 <h2 class="text-lg font-bold">Recent Site Costs</h2>
 </div>
-<div class="overflow-x-auto">
+<div class="space-y-3 p-4 md:hidden">
+@forelse($recentSiteCosts as $cost)
+<article class="rounded-xl border border-slate-100 bg-slate-50 p-4 shadow-sm">
+<div class="flex items-start justify-between gap-3">
+<div>
+<p class="text-[11px] font-semibold uppercase tracking-wide text-slate-500">{{ optional($cost->expense_date)->format('Y-m-d') }}</p>
+<h3 class="mt-1 font-bold text-slate-900">{{ $cost->title }}</h3>
+<p class="mt-1 text-sm text-slate-600">{{ $cost->project_name ?: 'No Site' }}</p>
+</div>
+<p class="text-right text-sm font-extrabold text-[#003d9b]">LKR {{ number_format((float) $cost->amount, 2) }}</p>
+</div>
+<div class="mt-3 flex flex-wrap items-center gap-2 text-xs text-slate-600">
+<span class="rounded-full bg-[#e2e7ff] px-2 py-1 font-semibold text-[#003d9b]">{{ $cost->category }}</span>
+@if($cost->receipt_path)
+<a class="inline-flex items-center gap-1 font-semibold text-[#003d9b]" href="{{ url('/storage/' . $cost->receipt_path) }}" target="_blank" rel="noopener noreferrer">
+<span class="material-symbols-outlined text-base">description</span>
+View Receipt
+</a>
+@else
+<span>No receipt</span>
+@endif
+</div>
+</article>
+@empty
+<p class="rounded-xl bg-slate-50 px-4 py-6 text-center text-sm text-slate-500">No site costs saved yet.</p>
+@endforelse
+</div>
+<div class="hidden overflow-x-auto md:block">
 <table class="w-full text-sm">
 <thead class="bg-slate-50 text-slate-600">
 <tr>
@@ -442,6 +474,32 @@
   const receiptFileName = document.getElementById("receipt-file-name");
   const saveBtn = document.getElementById("save-expense-btn");
   const statusText = document.getElementById("form-status");
+  const maxReceiptSizeBytes = 20 * 1024 * 1024;
+  const allowedReceiptExtensions = ["jpg", "jpeg", "png", "pdf"];
+  const allowedReceiptMimeTypes = ["image/jpeg", "image/png", "application/pdf"];
+
+  function resetReceiptSelection() {
+    receiptInput.value = "";
+    receiptFileName.textContent = "No file selected";
+  }
+
+  function validateReceiptFile(file) {
+    if (!file) {
+      return null;
+    }
+
+    const extension = (file.name.split('.').pop() || '').toLowerCase();
+
+    if (!allowedReceiptExtensions.includes(extension) || (file.type && !allowedReceiptMimeTypes.includes(file.type))) {
+      return "Receipt must be a JPG, PNG, or PDF file.";
+    }
+
+    if (file.size > maxReceiptSizeBytes) {
+      return "Receipt must be smaller than 20MB.";
+    }
+
+    return null;
+  }
 
   function setPaymentType(type) {
     const isCompany = type === "company_paid";
@@ -474,6 +532,16 @@
 
   receiptDropzone.addEventListener("click", () => receiptInput.click());
   receiptInput.addEventListener("change", () => {
+    const selectedFile = receiptInput.files[0];
+    const validationError = validateReceiptFile(selectedFile);
+
+    if (validationError) {
+      resetReceiptSelection();
+      statusText.textContent = validationError;
+      statusText.className = "mt-4 text-sm font-semibold text-red-700";
+      return;
+    }
+
     receiptFileName.textContent = receiptInput.files.length
       ? receiptInput.files[0].name
       : "No file selected";
@@ -526,11 +594,20 @@
     payload.append("notes", notes);
 
     if (receiptInput.files.length > 0) {
+      const receiptValidationError = validateReceiptFile(receiptInput.files[0]);
+
+      if (receiptValidationError) {
+        statusText.textContent = receiptValidationError;
+        statusText.className = "mt-4 text-sm font-semibold text-red-700";
+        saveBtn.disabled = false;
+        return;
+      }
+
       payload.append("receipt", receiptInput.files[0]);
     }
 
     try {
-      console.log("Submitting to:", `${apiBaseUrl}/expenses`);
+      console.log("Submitting to:", `${apiBaseUrl}/expenses`, "Payload keys:", Array.from(payload.keys()));
       const response = await fetch(`${apiBaseUrl}/expenses`, {
         method: "POST",
         headers: {
@@ -547,8 +624,18 @@
       console.log("Response:", result, "Status:", response.status);
 
       if (!response.ok) {
-        const errorMsg = result.message || result.errors || `Request failed (${response.status}).`;
-        throw new Error(typeof errorMsg === 'string' ? errorMsg : JSON.stringify(errorMsg));
+        let errorMsg = `Request failed (${response.status}).`;
+        if (result.message) {
+          errorMsg = result.message;
+        }
+        if (result.errors && typeof result.errors === 'object' && Object.keys(result.errors).length > 0) {
+          const fieldErrors = Object.entries(result.errors)
+            .map(([field, messages]) => `${field}: ${Array.isArray(messages) ? messages.join(', ') : messages}`)
+            .join('\n');
+          errorMsg = fieldErrors || errorMsg;
+        }
+        console.error("Full response:", result);
+        throw new Error(errorMsg);
       }
 
       expenseForm.reset();
@@ -562,7 +649,10 @@
       setTimeout(() => window.location.reload(), 450);
     } catch (error) {
       console.error("Error:", error);
-      statusText.textContent = "Error: " + error.message;
+      const uploadHint = error.message.includes("The receipt failed to upload.")
+        ? " Restart the backend with the 20MB upload command before uploading larger receipts."
+        : "";
+      statusText.textContent = "Error: " + error.message + uploadHint;
       statusText.className = "mt-4 text-sm font-semibold text-red-700";
     } finally {
       saveBtn.disabled = false;

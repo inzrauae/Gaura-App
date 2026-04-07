@@ -3,39 +3,62 @@
 use App\Models\Expense;
 use App\Models\Client;
 use App\Models\Project;
+use App\Http\Controllers\ReportController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/expenses', function () {
-    $availableProjects = Project::orderBy('name')->pluck('name');
-    $requestedProject = request('active_project');
+$resolveActiveProject = function ($availableProjects, ?string $requestedProject = null) {
     $selectedProjectName = null;
 
     if ($requestedProject !== null) {
-        $requestedProject = trim((string) $requestedProject);
+        $requestedProject = trim($requestedProject);
 
-        if ($requestedProject === '') {
+        if ($requestedProject === '' || strcasecmp($requestedProject, 'all') === 0) {
             session()->forget('active_project');
-        } else {
-            $matchedProject = $availableProjects->first(fn ($name) => strcasecmp($name, $requestedProject) === 0);
-            if ($matchedProject) {
-                $selectedProjectName = $matchedProject;
-                session(['active_project' => $matchedProject]);
-            }
+
+            return null;
         }
+
+        $matchedProject = $availableProjects->first(fn ($name) => strcasecmp($name, $requestedProject) === 0);
+
+        if ($matchedProject) {
+            session(['active_project' => $matchedProject]);
+
+            return $matchedProject;
+        }
+
+        session()->forget('active_project');
+
+        return null;
     }
 
-    $selectedProjectName ??= session('active_project');
-    if ($selectedProjectName && !$availableProjects->contains($selectedProjectName)) {
-        $selectedProjectName = null;
+    $selectedProjectName = session('active_project');
+
+    if ($selectedProjectName) {
+        $matchedProject = $availableProjects->first(fn ($name) => strcasecmp($name, $selectedProjectName) === 0);
+
+        if ($matchedProject) {
+            return $matchedProject;
+        }
+
         session()->forget('active_project');
     }
+
+    return null;
+};
+
+Route::get('/expenses', function () use ($resolveActiveProject) {
+    $availableProjects = Project::orderBy('name')->pluck('name');
+    $selectedProjectName = $resolveActiveProject(
+        $availableProjects,
+        request()->exists('active_project') ? (string) request()->query('active_project', '') : null
+    );
 
     $recentSiteCosts = Expense::query()
         ->when($selectedProjectName, fn ($query) => $query->where('project_name', $selectedProjectName))
         ->latest('expense_date')
         ->latest('id')
-        ->take(15)
+        ->take(50)
         ->get();
 
     return view('pos', [
@@ -47,30 +70,12 @@ Route::get('/expenses', function () {
     ]);
 })->name('expenses.create');
 
-Route::get('/', function () {
+Route::get('/', function () use ($resolveActiveProject) {
     $availableProjects = Project::orderBy('name')->pluck('name');
-    $requestedProject = request('active_project');
-    $selectedProjectName = null;
-
-    if ($requestedProject !== null) {
-        $requestedProject = trim((string) $requestedProject);
-
-        if ($requestedProject === '') {
-            session()->forget('active_project');
-        } else {
-            $matchedProject = $availableProjects->first(fn ($name) => strcasecmp($name, $requestedProject) === 0);
-            if ($matchedProject) {
-                $selectedProjectName = $matchedProject;
-                session(['active_project' => $matchedProject]);
-            }
-        }
-    }
-
-    $selectedProjectName ??= session('active_project');
-    if ($selectedProjectName && !$availableProjects->contains($selectedProjectName)) {
-        $selectedProjectName = null;
-        session()->forget('active_project');
-    }
+    $selectedProjectName = $resolveActiveProject(
+        $availableProjects,
+        request()->exists('active_project') ? (string) request()->query('active_project', '') : null
+    );
 
     $dashboardExpenses = Expense::query()
         ->when($selectedProjectName, fn ($query) => $query->where('project_name', $selectedProjectName));
@@ -120,23 +125,14 @@ Route::get('/dashboard', function () {
     return redirect()->route('dashboard', request()->only('active_project'));
 });
 
-Route::get('/analytics', function () {
+Route::get('/analytics', function () use ($resolveActiveProject) {
     $availableProjects = Project::orderBy('name')->pluck('name');
-    $requestedProject = request('active_project', request('project_name'));
-
-    if ($requestedProject !== null) {
-        if ($requestedProject === '') {
-            session()->forget('active_project');
-        } elseif ($availableProjects->contains($requestedProject)) {
-            session(['active_project' => $requestedProject]);
-        }
-    }
-
-    $selectedProjectName = session('active_project');
-    if ($selectedProjectName && !$availableProjects->contains($selectedProjectName)) {
-        $selectedProjectName = null;
-        session()->forget('active_project');
-    }
+    $selectedProjectName = $resolveActiveProject(
+        $availableProjects,
+        request()->exists('active_project')
+            ? (string) request()->query('active_project', '')
+            : (request()->exists('project_name') ? (string) request()->query('project_name', '') : null)
+    );
 
     $analyticsExpenses = Expense::query()
         ->when($selectedProjectName, fn ($query) => $query->where('project_name', $selectedProjectName));
@@ -208,24 +204,13 @@ Route::get('/analytics', function () {
     ]);
 })->name('analytics');
 
-Route::get('/projects', function () {
+Route::get('/projects', function () use ($resolveActiveProject) {
     $allProjects = Project::orderBy('name')->get();
     $availableProjects = $allProjects->pluck('name');
-    $requestedProject = request('active_project');
-
-    if ($requestedProject !== null) {
-        if ($requestedProject === '') {
-            session()->forget('active_project');
-        } elseif ($availableProjects->contains($requestedProject)) {
-            session(['active_project' => $requestedProject]);
-        }
-    }
-
-    $selectedProjectName = session('active_project');
-    if ($selectedProjectName && !$availableProjects->contains($selectedProjectName)) {
-        $selectedProjectName = null;
-        session()->forget('active_project');
-    }
+    $selectedProjectName = $resolveActiveProject(
+        $availableProjects,
+        request()->exists('active_project') ? (string) request()->query('active_project', '') : null
+    );
 
     $projectFilteredExpenses = Expense::query()
         ->when($selectedProjectName, fn ($query) => $query->where('project_name', $selectedProjectName));
@@ -279,24 +264,13 @@ Route::post('/projects', function (Request $request) {
     return redirect()->route('projects')->with('success', 'Project "' . trim($request->input('name')) . '" created.');
 })->name('projects.store');
 
-Route::get('/clients', function () {
+Route::get('/clients', function () use ($resolveActiveProject) {
     $availableProjects = Project::orderBy('name')->pluck('name');
-    $requestedProject = request('active_project');
     $search = trim((string) request('q', ''));
-
-    if ($requestedProject !== null) {
-        if ($requestedProject === '') {
-            session()->forget('active_project');
-        } elseif ($availableProjects->contains($requestedProject)) {
-            session(['active_project' => $requestedProject]);
-        }
-    }
-
-    $selectedProjectName = session('active_project');
-    if ($selectedProjectName && !$availableProjects->contains($selectedProjectName)) {
-        $selectedProjectName = null;
-        session()->forget('active_project');
-    }
+    $selectedProjectName = $resolveActiveProject(
+        $availableProjects,
+        request()->exists('active_project') ? (string) request()->query('active_project', '') : null
+    );
 
     $clients = Client::query()
         ->when($search !== '', function ($query) use ($search) {
@@ -339,23 +313,12 @@ Route::post('/clients', function (Request $request) {
     return redirect()->route('clients')->with('success', 'Client/person saved successfully.');
 })->name('clients.store');
 
-Route::get('/settings', function () {
+Route::get('/settings', function () use ($resolveActiveProject) {
     $availableProjects = Project::orderBy('name')->pluck('name');
-    $requestedProject = request('active_project');
-
-    if ($requestedProject !== null) {
-        if ($requestedProject === '') {
-            session()->forget('active_project');
-        } elseif ($availableProjects->contains($requestedProject)) {
-            session(['active_project' => $requestedProject]);
-        }
-    }
-
-    $selectedProjectName = session('active_project');
-    if ($selectedProjectName && !$availableProjects->contains($selectedProjectName)) {
-        $selectedProjectName = null;
-        session()->forget('active_project');
-    }
+    $selectedProjectName = $resolveActiveProject(
+        $availableProjects,
+        request()->exists('active_project') ? (string) request()->query('active_project', '') : null
+    );
 
     return view('settings', [
         'availableProjects' => $availableProjects,
@@ -364,3 +327,11 @@ Route::get('/settings', function () {
         'sidebarProjectSubtitle' => 'GAURA',
     ]);
 })->name('settings');
+
+Route::controller(ReportController::class)->group(function () {
+    Route::get('/reports', 'index')->name('reports');
+    Route::get('/api/reports/download-excel', 'downloadExcel')->name('reports.download.excel');
+    Route::get('/api/reports/download-pdf', 'downloadPdf')->name('reports.download.pdf');
+    Route::get('/api/reports/project/{projectName}/excel', 'downloadProjectExcel')->name('reports.download.project.excel');
+    Route::get('/api/reports/project/{projectName}/pdf', 'downloadProjectPdf')->name('reports.download.project.pdf');
+});
