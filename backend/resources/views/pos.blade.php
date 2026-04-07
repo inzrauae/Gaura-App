@@ -3,10 +3,11 @@
 <html lang="en"><head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>GAURA - Add Expense</title>
+<title>GAURA - Construction Cost Log</title>
+<link href="{{ asset('img/gaura-logo.png') }}" rel="icon" type="image/png"/>
+<link href="{{ asset('img/gaura-logo.png') }}" rel="apple-touch-icon"/>
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
 <script id="tailwind-config">
     tailwind.config = {
@@ -78,39 +79,33 @@
     .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-    body.dark { background: #0b1220; color: #e5e7eb; }
-    body.dark aside, body.dark header { background: #111827 !important; color: #e5e7eb; }
-    body.dark .bg-white, body.dark .bg-surface-container-lowest { background: #1f2937 !important; }
-    body.dark .bg-surface-container, body.dark .bg-surface-container-low, body.dark .bg-surface-dim { background: #111827 !important; }
-    body.dark .border-surface-container-high, body.dark .border-outline-variant { border-color: #374151 !important; }
-    body.dark .text-on-surface-variant { color: #9ca3af !important; }
-    body.dark .text-[#434654] { color: #d1d5db !important; }
-    body.dark .bg-[#f2f3ff] { background: #1f2937 !important; }
-    .theme-toggle { border: 1px solid #d1d5db; }
-    body.dark .theme-toggle { border-color: #374151; color: #e5e7eb; background: #111827; }
+    body {
+      background-image:
+        linear-gradient(rgba(19, 27, 46, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(19, 27, 46, 0.03) 1px, transparent 1px),
+        radial-gradient(circle at 100% 0%, rgba(247, 190, 29, 0.12), transparent 30%);
+      background-size: 28px 28px, 28px 28px, 100% 100%;
+      background-position: 0 0, 0 0, 0 0;
+    }
   </style>
 </head>
 <body class="bg-surface text-on-surface font-body">
 <!-- SideNavBar -->
-<meta name="theme-color" content="#003d9b"/>
-<meta name="apple-mobile-web-app-capable" content="yes"/>
-<meta name="apple-mobile-web-app-status-bar-style" content="default"/>
-<aside class="fixed left-0 top-0 flex flex-col h-full z-40 bg-[#faf8ff] dark:bg-slate-950 h-screen w-64 border-r-0 shadow-[8px_0_24px_rgba(19,27,46,0.06)] hidden md:flex">
+<aside class="fixed left-0 top-0 z-40 hidden h-screen w-64 flex-col bg-[#faf8ff] border-r-0 shadow-[8px_0_24px_rgba(19,27,46,0.06)] md:flex">
 <div class="px-6 py-8">
-<div class="text-lg font-bold text-[#003d9b] font-headline mb-8">GAURA</div>
-<div class="mb-8 p-4 bg-[#f2f3ff] dark:bg-slate-900 rounded-xl">
+<div class="mb-8 p-4 bg-[#f2f3ff] rounded-xl border border-amber-100">
 <div class="flex items-center gap-3">
-<div class="w-10 h-10 rounded-lg bg-primary-container flex items-center justify-center text-on-primary">
-<span class="material-symbols-outlined" data-icon="architecture">architecture</span>
+<div class="w-10 h-10 rounded-lg bg-white border border-slate-200 shadow-sm flex items-center justify-center">
+<img alt="GAURA mark" class="h-7 w-7 object-contain" src="{{ asset('img/gaura-logo.png') }}"/>
 </div>
 <div>
-<div class="text-sm font-bold font-headline leading-tight">{{ $sidebarProjectName }}</div>
-<div class="text-xs text-on-surface-variant">{{ $sidebarProjectSubtitle }}</div>
+<div class="inline-block rounded-md bg-white px-2 py-0.5 text-sm font-bold font-headline leading-tight text-[#003d9b]">{{ $sidebarProjectName }}</div>
+            <div class="text-xs text-on-surface-variant">Construction Operations</div>
 </div>
 </div>
 <form action="{{ route('expenses.create') }}" method="GET" class="mt-3">
 <select name="active_project" onchange="this.form.submit()" class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-600 focus:border-[#003d9b] focus:ring-[#003d9b]">
-<option value="">All Projects</option>
+<option value="">All Sites</option>
 @foreach($availableProjects as $projectName)
 <option value="{{ $projectName }}" {{ $selectedProjectName === $projectName ? 'selected' : '' }}>{{ $projectName }}</option>
 @endforeach
@@ -118,23 +113,27 @@
 </form>
 </div>
 <nav class="space-y-1">
-<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-[#434654] dark:text-slate-400 hover:bg-[#f2f3ff] dark:hover:bg-slate-800 transition-colors" href="{{ route('dashboard') }}">
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg border-r-4 border-transparent text-[#434654] hover:bg-[#f2f3ff] transition-colors" href="{{ route('dashboard') }}">
 <span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
-<span class="text-sm font-medium">Dashboard</span>
+<span class="text-sm font-medium">Site Dashboard</span>
 </a>
-<a class="flex items-center gap-3 px-4 py-3 rounded-lg bg-[#e2e7ff] dark:bg-blue-900/30 text-[#003d9b] dark:text-blue-200 border-r-4 border-[#003d9b] translate-x-1 transition-transform" href="{{ route('expenses.create') }}">
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg border-r-4 border-[#003d9b] bg-[#e2e7ff] text-[#003d9b]" href="{{ route('expenses.create') }}">
 <span class="material-symbols-outlined" data-icon="receipt_long">receipt_long</span>
-<span class="text-sm font-medium">Expenses</span>
+<span class="text-sm font-medium">Site Costs</span>
 </a>
-<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-[#434654] dark:text-slate-400 hover:bg-[#f2f3ff] dark:hover:bg-slate-800 transition-colors" href="{{ route('analytics') }}">
-<span class="material-symbols-outlined" data-icon="bar_chart">bar_chart</span>
-<span class="text-sm font-medium">Analytics</span>
-</a>
-<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-[#434654] dark:text-slate-400 hover:bg-[#f2f3ff] dark:hover:bg-slate-800 transition-colors" href="{{ route('projects') }}">
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg border-r-4 border-transparent text-[#434654] hover:bg-[#f2f3ff] transition-colors" href="{{ route('projects') }}">
 <span class="material-symbols-outlined" data-icon="architecture">architecture</span>
-<span class="text-sm font-medium">Projects</span>
+<span class="text-sm font-medium">Sites</span>
 </a>
-<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-[#434654] dark:text-slate-400 hover:bg-[#f2f3ff] dark:hover:bg-slate-800 transition-colors" href="{{ route('settings') }}">
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg border-r-4 border-transparent text-[#434654] hover:bg-[#f2f3ff] transition-colors" href="{{ route('analytics') }}">
+<span class="material-symbols-outlined" data-icon="bar_chart">bar_chart</span>
+<span class="text-sm font-medium">Cost Insights</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg border-r-4 border-transparent text-[#434654] hover:bg-[#f2f3ff] transition-colors" href="{{ route('clients') }}">
+<span class="material-symbols-outlined" data-icon="groups">groups</span>
+<span class="text-sm font-medium">Clients</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg border-r-4 border-transparent text-[#434654] hover:bg-[#f2f3ff] transition-colors" href="{{ route('settings') }}">
 <span class="material-symbols-outlined" data-icon="settings">settings</span>
 <span class="text-sm font-medium">Settings</span>
 </a>
@@ -143,7 +142,7 @@
 <div class="mt-auto px-6 py-6">
 <a class="w-full bg-gradient-to-br from-primary to-primary-container text-on-primary py-3 px-4 rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg active:scale-95 duration-150" href="{{ route('expenses.create') }}">
 <span class="material-symbols-outlined" data-icon="add">add</span>
-        New Expense
+  Add Site Cost
   </a>
 </div>
 </aside>
@@ -152,18 +151,17 @@
 <!-- TopNavBar -->
 <header class="sticky top-0 z-30 flex w-full items-center justify-between bg-[#faf8ff] px-6 py-3">
 <div class="flex items-center gap-8">
-<div class="md:hidden text-xl font-black text-[#003d9b] font-headline">CS</div>
+<div class="md:hidden text-xl font-black text-[#003d9b] font-headline">GA</div>
 <nav class="hidden md:flex items-center gap-6">
-<a class="text-[#434654] dark:text-slate-400 hover:bg-[#e2e7ff] dark:hover:bg-slate-700 transition-colors px-2 py-1 rounded" href="{{ route('projects') }}">Projects</a>
-<a class="text-[#003d9b] dark:text-blue-400 font-bold border-b-2 border-[#003d9b] pb-1" href="{{ route('expenses.create') }}">Expenses</a>
-<a class="text-[#434654] dark:text-slate-400 hover:bg-[#e2e7ff] dark:hover:bg-slate-700 transition-colors px-2 py-1 rounded" href="{{ route('analytics') }}">Reports</a>
+<a class="text-[#434654] hover:bg-[#e2e7ff] transition-colors px-2 py-1 rounded" href="{{ route('projects') }}">Sites</a>
+<a class="text-[#003d9b] font-bold border-b-2 border-[#003d9b] pb-1" href="{{ route('expenses.create') }}">Site Costs</a>
+<a class="text-[#434654] hover:bg-[#e2e7ff] transition-colors px-2 py-1 rounded" href="{{ route('analytics') }}">Cost Insights</a>
 </nav>
 </div>
 <div class="flex items-center gap-4">
-<button id="theme-toggle" class="theme-toggle rounded-lg px-3 py-2 text-sm font-semibold" type="button">Dark</button>
 <div class="relative hidden sm:block">
 <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-sm" data-icon="search">search</span>
-<input class="pl-10 pr-4 py-2 bg-[#f2f3ff] dark:bg-slate-800/50 border-none rounded-full text-sm focus:ring-2 focus:ring-primary w-64" placeholder="Search records..." type="text"/>
+<input class="pl-10 pr-4 py-2 bg-[#f2f3ff] border-none rounded-full text-sm focus:ring-2 focus:ring-primary w-64" placeholder="Search costs..." type="text"/>
 </div>
 <button class="w-10 h-10 flex items-center justify-center text-[#434654] hover:bg-[#e2e7ff] rounded-full transition-colors">
 <span class="material-symbols-outlined" data-icon="notifications">notifications</span>
@@ -178,10 +176,19 @@
 </header>
 <!-- Content Canvas -->
 <main class="mx-auto w-full max-w-6xl flex-1 p-6 pb-24 md:p-10 md:pb-10">
+<section class="mb-6 rounded-xl border border-amber-200 bg-gradient-to-r from-amber-50 via-white to-slate-100 px-4 py-3 shadow-sm">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-amber-600" style="font-variation-settings: 'FILL' 1;">engineering</span>
+<div>
+<p class="text-xs font-extrabold uppercase tracking-wider text-slate-600">Construction Control Panel</p>
+<p class="text-sm text-slate-700">Track labor, material, and site-operation costs with project-level accuracy.</p>
+</div>
+</div>
+</section>
 <!-- Page Header -->
 <div class="mb-10">
-<h1 class="text-3xl font-extrabold text-on-background tracking-tight mb-2">Add New Expense</h1>
-<p class="text-on-surface-variant">Log a new project expenditure with precise tracking.</p>
+<h1 class="text-3xl font-extrabold text-on-background tracking-tight mb-2">Log Site Expense</h1>
+<p class="text-on-surface-variant">Capture construction spending across labor, materials, transport, and subcontractor work.</p>
 </div>
 <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
 <!-- Main Form Panel -->
@@ -204,9 +211,20 @@
                 </label>
 <select class="w-full bg-surface-container-low border-0 border-b-2 border-transparent focus:border-primary focus:ring-0 px-4 py-3 rounded-lg text-sm transition-all appearance-none" id="expense-category">
 <option>Labor</option>
-<option>Materials</option>
-<option>Transport</option>
-<option>Equipment</option>
+<option>Excavation and Earthwork</option>
+<option>Concrete and Cement</option>
+<option>Steel and Metal</option>
+<option>Masonry and Blockwork</option>
+<option>MEP Works</option>
+<option>Electrical and Lighting</option>
+<option>Plumbing and Sanitary</option>
+<option>Waterproofing and Roofing</option>
+<option>Transport and Logistics</option>
+<option>Equipment Rental</option>
+<option>Site Safety and PPE</option>
+<option>Finishing Works</option>
+<option>Doors and Windows</option>
+<option>Permits and Compliance</option>
 <option>Other</option>
 </select>
 </div>
@@ -215,10 +233,10 @@
 <div class="space-y-2">
 <label class="text-xs font-bold uppercase tracking-wider text-on-surface-variant flex items-center gap-2">
 <span class="material-symbols-outlined text-sm" data-icon="architecture">architecture</span>
-                Project
+                Site
               </label>
 <select class="w-full bg-surface-container-low border-0 border-b-2 border-transparent focus:border-primary focus:ring-0 px-4 py-3 rounded-lg text-sm transition-all appearance-none" id="project-name">
-<option value="">— No Project —</option>
+<option value="">— No Site —</option>
 @foreach($availableProjects as $proj)
 <option value="{{ $proj }}" {{ $selectedProjectName === $proj ? 'selected' : '' }}>{{ $proj }}</option>
 @endforeach
@@ -228,9 +246,9 @@
 <div class="space-y-2">
 <label class="text-xs font-bold uppercase tracking-wider text-on-surface-variant flex items-center gap-2">
 <span class="material-symbols-outlined text-sm" data-icon="description">description</span>
-                Expense Title
+                Cost Title
               </label>
-<input class="w-full bg-surface-container-low border-0 border-b-2 border-transparent focus:border-primary focus:ring-0 px-4 py-3 rounded-lg text-sm transition-all" id="expense-title" placeholder="e.g., Bulk Timber Delivery - Site 102" type="text"/>
+<input class="w-full bg-surface-container-low border-0 border-b-2 border-transparent focus:border-primary focus:ring-0 px-4 py-3 rounded-lg text-sm transition-all" id="expense-title" placeholder="e.g., Ready-mix concrete delivery - Tower A" type="text"/>
 </div>
 <!-- Amount Field -->
 <div class="space-y-2">
@@ -304,8 +322,8 @@
 <div class="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm group-hover:scale-110 transition-transform">
 <span class="material-symbols-outlined text-primary text-3xl" data-icon="upload_file">upload_file</span>
 </div>
-<h3 class="font-bold text-lg mb-1">Upload Receipt</h3>
-<p class="text-xs text-on-surface-variant mb-4">PNG, JPG or PDF up to 10MB</p>
+<h3 class="font-bold text-lg mb-1">Upload Invoice or Delivery Note</h3>
+<p class="text-xs text-on-surface-variant mb-4">PNG, JPG, or PDF up to 10MB</p>
 <div class="text-xs font-bold text-primary py-2 px-4 bg-primary/10 rounded-full inline-block">Browse Files</div>
 <input accept=".png,.jpg,.jpeg,.pdf" class="hidden" id="receipt-file" type="file"/>
 <p class="mt-3 text-xs text-on-surface-variant" id="receipt-file-name">No file selected</p>
@@ -318,7 +336,7 @@
                 Pro Tip
               </h4>
 <p class="text-xs text-on-surface-variant leading-relaxed">
-                Categorizing expenses by <strong>Equipment</strong> helps you track maintenance-related costs for {{ $sidebarProjectName }}.
+                Separate <strong>Concrete and Cement</strong> from <strong>Labor</strong> to get cleaner BOQ variance reports for {{ $sidebarProjectName }}.
               </p>
 </div>
 <span class="material-symbols-outlined absolute -bottom-4 -right-4 text-8xl text-surface-container opacity-20 rotate-12" data-icon="receipt">receipt</span>
@@ -331,10 +349,56 @@
           Cancel
         </button>
 <button class="bg-gradient-to-br from-primary to-primary-container text-white px-10 py-3 rounded-lg font-extrabold text-sm shadow-xl hover:shadow-primary/20 active:scale-95 transition-all" form="expense-form" id="save-expense-btn" type="submit">
-          Save Expense
+          Save Cost
         </button>
 </div>
 <p class="mt-4 text-sm font-semibold" id="form-status"></p>
+
+<section class="mt-10 overflow-hidden rounded-xl border border-slate-100 bg-white shadow-sm">
+<div class="border-b border-slate-100 px-5 py-4">
+<h2 class="text-lg font-bold">Recent Site Costs</h2>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-sm">
+<thead class="bg-slate-50 text-slate-600">
+<tr>
+<th class="px-5 py-3 text-left">Date</th>
+<th class="px-5 py-3 text-left">Title</th>
+<th class="px-5 py-3 text-left">Category</th>
+<th class="px-5 py-3 text-left">Site</th>
+<th class="px-5 py-3 text-right">Amount</th>
+<th class="px-5 py-3 text-center">Receipt / Bill</th>
+</tr>
+</thead>
+<tbody>
+@forelse($recentSiteCosts as $cost)
+<tr class="border-t border-slate-100">
+<td class="px-5 py-3 text-slate-500">{{ optional($cost->expense_date)->format('Y-m-d') }}</td>
+<td class="px-5 py-3 font-medium">{{ $cost->title }}</td>
+<td class="px-5 py-3">{{ $cost->category }}</td>
+<td class="px-5 py-3">{{ $cost->project_name ?: 'No Site' }}</td>
+<td class="px-5 py-3 text-right font-semibold">LKR {{ number_format((float) $cost->amount, 2) }}</td>
+<td class="px-5 py-3 text-center">
+@if($cost->receipt_path)
+<a class="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-[#e2e7ff] text-[#003d9b] hover:bg-[#d6dcff]" href="{{ url('/storage/' . $cost->receipt_path) }}" target="_blank" rel="noopener noreferrer" title="Open receipt">
+<span class="material-symbols-outlined text-base">description</span>
+</a>
+@else
+<span class="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-slate-100 text-slate-400" title="No receipt">
+<span class="material-symbols-outlined text-base">description</span>
+</span>
+@endif
+</td>
+</tr>
+@empty
+<tr>
+<td class="px-5 py-8 text-center text-slate-500" colspan="6">No site costs saved yet.</td>
+</tr>
+@endforelse
+</tbody>
+</table>
+</div>
+</section>
 </main>
 </div>
 <!-- Mobile Navigation Shell -->
@@ -345,7 +409,7 @@
 </a>
 <a class="flex flex-col items-center gap-1 text-[#003d9b]" href="{{ route('expenses.create') }}">
 <span class="material-symbols-outlined" data-icon="receipt_long" data-weight="fill" style="font-variation-settings: 'FILL' 1;">receipt_long</span>
-<span class="text-[10px] font-bold">Expenses</span>
+<span class="text-[10px] font-bold">Costs</span>
 </a>
 <div class="relative -top-6">
 <a class="w-14 h-14 bg-primary text-white rounded-full flex items-center justify-center shadow-lg" href="{{ route('expenses.create') }}">
@@ -354,7 +418,7 @@
 </div>
 <a class="flex flex-col items-center gap-1 text-on-surface-variant" href="{{ route('analytics') }}">
 <span class="material-symbols-outlined" data-icon="bar_chart">bar_chart</span>
-<span class="text-[10px] font-medium">Reports</span>
+<span class="text-[10px] font-medium">Insights</span>
 </a>
 <a class="flex flex-col items-center gap-1 text-on-surface-variant" href="{{ route('settings') }}">
 <span class="material-symbols-outlined" data-icon="settings">settings</span>
@@ -363,6 +427,7 @@
 </nav>
 <script>
   const apiBaseUrl = `${window.location.origin}/api`;
+  const activeProjectDefault = @json($selectedProjectName ?? '');
 
   const expenseForm = document.getElementById("expense-form");
   const companyBtn = document.getElementById("payment-company");
@@ -488,11 +553,13 @@
 
       expenseForm.reset();
       document.getElementById("expense-date").value = new Date().toISOString().split('T')[0];
+      document.getElementById("project-name").value = activeProjectDefault;
       receiptInput.value = "";
       receiptFileName.textContent = "No file selected";
       setPaymentType("company_paid");
       statusText.textContent = "✓ Expense saved successfully!";
       statusText.className = "mt-4 text-sm font-semibold text-green-600";
+      setTimeout(() => window.location.reload(), 450);
     } catch (error) {
       console.error("Error:", error);
       statusText.textContent = "Error: " + error.message;
@@ -507,18 +574,5 @@
 
   setPaymentType("company_paid");
 
-  (function () {
-    const key = 'gaura_theme';
-    const saved = localStorage.getItem(key);
-    if (saved === 'dark') document.body.classList.add('dark');
-    const btn = document.getElementById('theme-toggle');
-    const sync = () => { btn.textContent = document.body.classList.contains('dark') ? 'Light' : 'Dark'; };
-    sync();
-    btn.addEventListener('click', function () {
-      document.body.classList.toggle('dark');
-      localStorage.setItem(key, document.body.classList.contains('dark') ? 'dark' : 'light');
-      sync();
-    });
-  })();
 </script>
 </body></html>

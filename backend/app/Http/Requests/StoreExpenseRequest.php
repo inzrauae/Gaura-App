@@ -25,7 +25,7 @@ class StoreExpenseRequest extends FormRequest
         return [
             'expense_date' => ['required', 'date'],
             'project_name' => ['nullable', 'string', 'max:100'],
-            'category' => ['required', 'string', 'in:Labor,Materials,Transport,Equipment,Other'],
+            'category' => ['required', 'string', 'in:Labor,Excavation and Earthwork,Concrete and Cement,Steel and Metal,Masonry and Blockwork,MEP Works,Electrical and Lighting,Plumbing and Sanitary,Waterproofing and Roofing,Transport and Logistics,Equipment Rental,Site Safety and PPE,Finishing Works,Doors and Windows,Permits and Compliance,Other'],
             'title' => ['required', 'string', 'max:255'],
             'amount' => ['required', 'numeric', 'min:0'],
             'payment_type' => ['required', 'in:company_paid,director_paid'],

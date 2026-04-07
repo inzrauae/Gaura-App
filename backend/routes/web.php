@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Expense;
+use App\Models\Client;
 use App\Models\Project;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -8,42 +9,64 @@ use Illuminate\Support\Facades\Route;
 Route::get('/expenses', function () {
     $availableProjects = Project::orderBy('name')->pluck('name');
     $requestedProject = request('active_project');
+    $selectedProjectName = null;
 
     if ($requestedProject !== null) {
+        $requestedProject = trim((string) $requestedProject);
+
         if ($requestedProject === '') {
             session()->forget('active_project');
-        } elseif ($availableProjects->contains($requestedProject)) {
-            session(['active_project' => $requestedProject]);
+        } else {
+            $matchedProject = $availableProjects->first(fn ($name) => strcasecmp($name, $requestedProject) === 0);
+            if ($matchedProject) {
+                $selectedProjectName = $matchedProject;
+                session(['active_project' => $matchedProject]);
+            }
         }
     }
 
-    $selectedProjectName = session('active_project');
+    $selectedProjectName ??= session('active_project');
     if ($selectedProjectName && !$availableProjects->contains($selectedProjectName)) {
         $selectedProjectName = null;
         session()->forget('active_project');
     }
+
+    $recentSiteCosts = Expense::query()
+        ->when($selectedProjectName, fn ($query) => $query->where('project_name', $selectedProjectName))
+        ->latest('expense_date')
+        ->latest('id')
+        ->take(15)
+        ->get();
 
     return view('pos', [
         'availableProjects' => $availableProjects,
         'sidebarProjectName' => 'GAURA',
         'sidebarProjectSubtitle' => 'GAURA',
         'selectedProjectName' => $selectedProjectName,
+        'recentSiteCosts' => $recentSiteCosts,
     ]);
 })->name('expenses.create');
 
 Route::get('/', function () {
     $availableProjects = Project::orderBy('name')->pluck('name');
     $requestedProject = request('active_project');
+    $selectedProjectName = null;
 
     if ($requestedProject !== null) {
+        $requestedProject = trim((string) $requestedProject);
+
         if ($requestedProject === '') {
             session()->forget('active_project');
-        } elseif ($availableProjects->contains($requestedProject)) {
-            session(['active_project' => $requestedProject]);
+        } else {
+            $matchedProject = $availableProjects->first(fn ($name) => strcasecmp($name, $requestedProject) === 0);
+            if ($matchedProject) {
+                $selectedProjectName = $matchedProject;
+                session(['active_project' => $matchedProject]);
+            }
         }
     }
 
-    $selectedProjectName = session('active_project');
+    $selectedProjectName ??= session('active_project');
     if ($selectedProjectName && !$availableProjects->contains($selectedProjectName)) {
         $selectedProjectName = null;
         session()->forget('active_project');
@@ -94,7 +117,7 @@ Route::get('/', function () {
 })->name('dashboard');
 
 Route::get('/dashboard', function () {
-    return redirect()->route('dashboard');
+    return redirect()->route('dashboard', request()->only('active_project'));
 });
 
 Route::get('/analytics', function () {
@@ -255,6 +278,66 @@ Route::post('/projects', function (Request $request) {
 
     return redirect()->route('projects')->with('success', 'Project "' . trim($request->input('name')) . '" created.');
 })->name('projects.store');
+
+Route::get('/clients', function () {
+    $availableProjects = Project::orderBy('name')->pluck('name');
+    $requestedProject = request('active_project');
+    $search = trim((string) request('q', ''));
+
+    if ($requestedProject !== null) {
+        if ($requestedProject === '') {
+            session()->forget('active_project');
+        } elseif ($availableProjects->contains($requestedProject)) {
+            session(['active_project' => $requestedProject]);
+        }
+    }
+
+    $selectedProjectName = session('active_project');
+    if ($selectedProjectName && !$availableProjects->contains($selectedProjectName)) {
+        $selectedProjectName = null;
+        session()->forget('active_project');
+    }
+
+    $clients = Client::query()
+        ->when($search !== '', function ($query) use ($search) {
+            $query->where(function ($inner) use ($search) {
+                $inner->where('name', 'like', "%{$search}%")
+                    ->orWhere('entity_type', 'like', "%{$search}%")
+                    ->orWhere('company', 'like', "%{$search}%")
+                    ->orWhere('phone', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%")
+                    ->orWhere('address', 'like', "%{$search}%")
+                    ->orWhere('notes', 'like', "%{$search}%");
+            });
+        })
+        ->latest('id')
+        ->get();
+
+    return view('clients', [
+        'clients' => $clients,
+        'availableProjects' => $availableProjects,
+        'selectedProjectName' => $selectedProjectName,
+        'search' => $search,
+        'sidebarProjectName' => 'GAURA',
+        'sidebarProjectSubtitle' => 'GAURA',
+    ]);
+})->name('clients');
+
+Route::post('/clients', function (Request $request) {
+    $validated = $request->validate([
+        'name' => ['required', 'string', 'max:150'],
+        'entity_type' => ['required', 'in:client,person'],
+        'company' => ['nullable', 'string', 'max:150'],
+        'phone' => ['nullable', 'string', 'max:50'],
+        'email' => ['nullable', 'email', 'max:150'],
+        'address' => ['nullable', 'string', 'max:255'],
+        'notes' => ['nullable', 'string'],
+    ]);
+
+    Client::create($validated);
+
+    return redirect()->route('clients')->with('success', 'Client/person saved successfully.');
+})->name('clients.store');
 
 Route::get('/settings', function () {
     $availableProjects = Project::orderBy('name')->pluck('name');

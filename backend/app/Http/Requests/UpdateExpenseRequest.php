@@ -25,7 +25,7 @@ class UpdateExpenseRequest extends FormRequest
         return [
             'expense_date' => ['sometimes', 'date'],
             'project_name' => ['sometimes', 'nullable', 'string', 'max:100'],
-            'category' => ['sometimes', 'string', 'in:Labor,Materials,Transport,Equipment,Other'],
+            'category' => ['sometimes', 'string', 'in:Labor,Excavation and Earthwork,Concrete and Cement,Steel and Metal,Masonry and Blockwork,MEP Works,Electrical and Lighting,Plumbing and Sanitary,Waterproofing and Roofing,Transport and Logistics,Equipment Rental,Site Safety and PPE,Finishing Works,Doors and Windows,Permits and Compliance,Other'],
             'title' => ['sometimes', 'string', 'max:255'],
             'amount' => ['sometimes', 'numeric', 'min:0'],
             'payment_type' => ['sometimes', 'in:company_paid,director_paid'],
