@@ -58,7 +58,7 @@ After deploy:
 6. Runs Laravel setup:
    - `php artisan key:generate --force`
    - `php artisan storage:link`
-   - `php artisan migrate --seed --force`
+   - `php artisan migrate --force`
    - `php artisan optimize:clear`
    - `php artisan route:cache`
    - `php artisan view:cache`
@@ -77,5 +77,6 @@ bash ~/repo-name/backend/update.sh branch-name repo-name
 ## 6) Notes
 
 - `config:cache` is intentionally not used.
+- Sample seed data is disabled; production deploys do not run database seeders.
 - Ensure the DB user in `.env.production` is exactly what cPanel created.
 - If your repo is private, keep token use to terminal commands (avoid committing token anywhere).

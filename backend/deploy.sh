@@ -81,7 +81,7 @@ artisan_setup() {
         cd "$APP_PATH"
         php artisan key:generate --force
         php artisan storage:link || true
-        php artisan migrate --seed --force
+        php artisan migrate --force
         php artisan optimize:clear
         php artisan route:cache
         php artisan view:cache
