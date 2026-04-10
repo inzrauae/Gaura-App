@@ -95,9 +95,9 @@ main() {
     update_repo
     prepare_env
     install_php_deps
-    artisan_refresh
     publish_public_files
     set_permissions
+    artisan_refresh
 
     echo "Update finished: https://ex.gauraconstruction.lk/"
 }

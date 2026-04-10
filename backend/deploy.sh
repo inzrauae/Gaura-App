@@ -93,9 +93,9 @@ main() {
     ensure_composer
     install_php_deps
     prepare_env
-    artisan_setup
     publish_public_files
     set_permissions
+    artisan_setup
 
     echo "Deployment finished: https://ex.gauraconstruction.lk/"
 }
