@@ -47,6 +47,19 @@ $resolveActiveProject = function ($availableProjects, ?string $requestedProject 
     return null;
 };
 
+$buildMonthlyTotals = function ($expenseQuery) {
+    return (clone $expenseQuery)
+        ->orderBy('expense_date')
+        ->get(['expense_date', 'amount'])
+        ->groupBy(fn (Expense $expense) => optional($expense->expense_date)->format('Y-m'))
+        ->filter(fn ($expenses, $month) => $month !== null)
+        ->map(fn ($expenses, $month) => (object) [
+            'month' => $month,
+            'total' => (float) $expenses->sum('amount'),
+        ])
+        ->values();
+};
+
 Route::get('/expenses', function () use ($resolveActiveProject) {
     $availableProjects = Project::orderBy('name')->pluck('name');
     $selectedProjectName = $resolveActiveProject(
@@ -70,7 +83,7 @@ Route::get('/expenses', function () use ($resolveActiveProject) {
     ]);
 })->name('expenses.create');
 
-Route::get('/', function () use ($resolveActiveProject) {
+Route::get('/', function () use ($resolveActiveProject, $buildMonthlyTotals) {
     $availableProjects = Project::orderBy('name')->pluck('name');
     $selectedProjectName = $resolveActiveProject(
         $availableProjects,
@@ -93,11 +106,7 @@ Route::get('/', function () use ($resolveActiveProject) {
         ->take(10)
         ->get();
 
-    $monthlyRows = (clone $dashboardExpenses)
-        ->selectRaw("strftime('%Y-%m', expense_date) as month, SUM(amount) as total")
-        ->groupBy('month')
-        ->orderBy('month')
-        ->get();
+    $monthlyRows = $buildMonthlyTotals($dashboardExpenses);
 
     $categoryRows = (clone $dashboardExpenses)
         ->selectRaw('category, SUM(amount) as total')
@@ -125,7 +134,7 @@ Route::get('/dashboard', function () {
     return redirect()->route('dashboard', request()->only('active_project'));
 });
 
-Route::get('/analytics', function () use ($resolveActiveProject) {
+Route::get('/analytics', function () use ($resolveActiveProject, $buildMonthlyTotals) {
     $availableProjects = Project::orderBy('name')->pluck('name');
     $selectedProjectName = $resolveActiveProject(
         $availableProjects,
@@ -183,11 +192,7 @@ Route::get('/analytics', function () use ($resolveActiveProject) {
         ];
     });
 
-    $monthlyTotals = (clone $analyticsExpenses)
-        ->selectRaw("strftime('%Y-%m', expense_date) as month, SUM(amount) as total")
-        ->groupBy('month')
-        ->orderBy('month')
-        ->get();
+    $monthlyTotals = $buildMonthlyTotals($analyticsExpenses);
 
     return view('analytics', [
         'totalAmount' => $totalAmount,
